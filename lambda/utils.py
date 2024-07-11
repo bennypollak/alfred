@@ -1,11 +1,8 @@
 import logging
-import os
-import boto3
-from botocore.exceptions import ClientError
 import json
 from datetime import datetime
 import requests
-
+from configs import echo_device_map
 def to_dict(obj):
     if isinstance(obj, list):
         return [to_dict(item) for item in obj]
@@ -41,7 +38,7 @@ def slot_value(handler_input, name, default=None):
     print(f"Slot name: {name}")
     if name in slots:
         value = slots[name].value #.lower
-        value = str(value).lower() if value else None
+        value = str(value).lower() if value else default
         resolved_value = value
         print(f"Slot {name} found as {value}")
         if value and slots[name].resolutions and slots[name].resolutions.resolutions_per_authority:
@@ -89,28 +86,34 @@ device_map = {
         }
     }
 }
-valid_rooms = ['small', 'big']
+room_map = {'small': 'small', 'bedroom': 'small', 'big': 'big', 'livingroom': 'big', 'desk': 'big'}
 valid_devices = ['tv', 'tivo']
 stations = {
     "cnn": 600, "abc": 507, "nbc": 502, "cbs": 502, "fox": 505, "espn": 570, "hbo": 899, "showtime": 865,
     "tiny": 4, "huge": 1000
 }
-def get_device(room, device='tv', short=False):
-    if room not in valid_rooms or device not in valid_devices:
-        return None
-    return device_map[device][room]['short' if short else 'device']
+commands_map = {
+    "ScreenPowerIntent": {
+        "device": "tv",
+    },
+    "ChannelIntent": {
+        "device": "tivo",
+    }
+}
 
-def send_tv_request(room, commands='onoff'):
-    device = get_device(room, 'tv')
-    if not device:
-        return f"TV not found in {room}"
-    url = f"https://yo372002.ngrok.io/hubs/harmony-hub/devices/{device}/commands/{commands}"
-    return send_request(url)
+def room_echo_device_in(handler_input):
+    device_name = echo_device_name(handler_input)
+    return room_map.get(device_name)
+
+def get_device(room, device_type='tv', short=False):
+    if room not in room_map or device_type not in valid_devices:
+        return None
+    return device_map[device_type][room]['short' if short else 'device']
 
 def send_channel_request(room, channel=None, station=None):
     device = get_device(room, 'tivo', short=True)
     if not device:
-        return f"Tivo not found in {room}"
+        return f"{device} not found in {room}"
     slug = ''
     if station:
         channel = stations.get(station)
@@ -122,42 +125,46 @@ def send_channel_request(room, channel=None, station=None):
     url = f"https://yo372002.ngrok.io/hubs/harmony-hub/commandlist/{slug}"
     return send_request(url)
 
+def send_generic_request(session_attributes):
+    intent_name = session_attributes.get('intent_name')
+    device_type = commands_map.get(intent_name)['device']
+    room = session_attributes.get('intended_room_name')
+    device = device_map[device_type][room]['short']
+    if not device:
+        return f"No device found in {room} for {intent_name}"
+    slug = ''
+    if intent_name == 'ChannelIntent':
+        channel = session_attributes.get('channel_number')
+        station = session_attributes.get('intended_station')
+        if station:
+            channel = stations.get(station)
+        if channel is None:
+            return f"No station for {room}"
+        commands = list(str(channel))
+    else:
+        commands = ['power-toggle'] # session_attributes.get('power')
+    for command in commands:
+        slug += f"{device}:{command},"
+    slug = slug[:-1]
+    url = f"https://yo372002.ngrok.io/hubs/harmony-hub/commandlist/{slug}"
+    return send_request(url)
 
-
-
-bucket_name = 'fd531fda-6127-49a9-b6dc-5d1754221ed0-us-east-1'
-file_key = 'test.txt'
-s3_client = boto3.client('s3')
-
-def s3_read(bucket, key):
-    """Read the content of an S3 file."""
-    response = s3_client.get_object(Bucket=bucket, Key=key)
-    content = response['Body'].read().decode('utf-8')
-    return content
-
-def s3_write(content, bucket=bucket_name, key=file_key, append=True, newline=True):
-    if newline:
-        content = '\n' + content
-    if append:
-        try:
-            current_content = s3_read(bucket, key)
-            content = current_content + content
-        except ClientError as e:
-            if e.response['Error']['Code'] == 'NoSuchKey':
-                pass
-            else:
-                raise
-        s3_client.put_object(Bucket=bucket, Key=key, Body=content.encode('utf-8'))
-
-echo_device_map = {
-    "amzn1.ask.device.AMA6SNV7ZV7UGFBNWNIETNX7QQGECL34YVRGDCZWMDVJP5OORNHBIGCNLAHEBTRS625BU7J3GFUXWWGNVOT5RM3DEUVRTEWSPJFHIBK6LDBUPNRSOL427OWPOVZVIV2IPE4RZ7KLVBJ3DCDC55E3XRRLKKVQS5ZXCUZH6UTGPVPBGEU7AB2KILZM7BJB54C64BCETAMMIGBRJBSD": "livingroom",
-    "amzn1.ask.device.AMAXBAW7JBUZYYPMO6WS4DQCGGCX7PWI63LRD626DQJMJXEDRHPM7FA3DUNXIQUHFSX57ZPXYCI5AFM7RHDHVIATSKHCURO4ETXQXNHTYNV4WSQV4DB2TZWCIPSCF6UF2JGNJRQF2L5W4AYRBJD2MO6P4TH2VLN4SK67D2EFYGO4TX3BKUNXGIHXKTDZIS62ROMBW": "retired",
-    "amzn1.ask.device.AMATH75Q4RFEKCXKEU4GLKJEGJ2BEDAVFUWKMIU3LHHVUVGK2NBKJUOO447U55GIUJMLOMJPS7ED6FSQ2GTYQE4LI5CO3PHCYSNTVCGI4ORL5YN2MFY76SSTVL22TYQORFDC2445S3SHZEQAMAO556QQLSCRHZXF3OJJ4DVAQHCXMAQRQSGY2BIIUMVEEVOKLM4CNGV7RD77Z2KP": "bedroom",
-    "amzn1.ask.device.AMAXJAPA4OTSER5H6YZ2LVKHQAKL4FTPBEWPSFMKEDCT5Z7UF3EYUREQ7O7F2SHLZJPYFRY3HY4E2DAFNUZYRUD6PUSGNN7ZWAH4MPOJL2UGRFSGEHVTSKVLHFISTGH3UFYSVAIOGHG4ONSE6IIJVYWAUWZRQW2SOWTRHLOTBEVTWSFRRNQA646J7VHEH3D2GDHI22DYP2YX6KI": "kitchen",
-    "amzn1.ask.device.AMA5R44WCBSXEWTJ4ILRVBZNPLXHB24I5FTG5E6EQ5P5KB2GDX3IISOHCN6TNXLCSNPNWITESBC4J7DGJDIEN62D2XOVG3U4XRVGP4P6M2YFUEFNDLLGHPMULKO43KM7J5H75ZEB5GPJ77TVQUF7VRGRPRUSBUYXVJ2BP6TY5XTYENYJY733MLJ3NHTDAUD7SKZDWJD6NPJL3CQ": "test",
-    "amzn1.ask.device.AMA4UBAJ5A3XUSANPNJWCEHQIYC5FWEARFWN3VKIKUQIV7Q72FXGYLCOXAS56FRTSP2FBYLJKBBYTOLZRX35YKQNJ6QEU7QFWDIXATZTYECP2VYOGV46OHHW35GEOGKOIUS536EVP4NOZ55R5JW7CKKAO4IEZNCXAV3YVT6ARRESWAGAQTRXG65VXYWJGYITC2ABLGONYSMCDLYH": "iphone",
-    "amzn1.ask.device.AMAZ5FPGYM43LH3SO7RAQX7UEJFN4Y5IWUVHSMZDNEKHBKUXYG3VOTJAHFHSH3ENLDNHZQINHBCTVYFBLCRWRZKKWASCBORGOILNEMF5WMZ4NTUBF5FW4FK7SFLVJ6G2GQ3TKHXUEPHKI7NYCZXZUY6L3DIZQ6UFJRUSNQVRITLLHSN2YH3QDZ36DM2UJ32NVPPQJH2ANYSFY363": "desk"
-}
 def echo_device_name(handler_input):
     device_id = handler_input.request_envelope.context.system.device.device_id
     return echo_device_map.get(device_id, "unknown")
+
+def dump_request(handler_input):
+    intent_request = handler_input.request_envelope.request
+    session_attributes = handler_input.attributes_manager.session_attributes
+    print("Intent Request Object: " + json.dumps(to_dict(intent_request)))
+    print("Session Attributes: " + json.dumps(session_attributes))
+
+def camel_to_space(input_string):
+    result = ""
+    for char in input_string:
+        if char.isupper():
+            result += " " + char.lower()
+        else:
+            result += char
+    return result.lstrip()
+
