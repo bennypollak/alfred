@@ -42,7 +42,8 @@
           "prompts": {}
         },
         {
-          "slots": -
+          "slots": [
+            {
               "name": "channel_number",
               "elicitationRequired": false,
               "validations": [
