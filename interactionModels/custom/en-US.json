@@ -1,391 +1,420 @@
 {
-  "interactionModel": {
-    "dialog": {
-      "intents": [
-        {
-          "slots": [
-            {
-              "name": "room",
-              "elicitationRequired": true,
-              "type": "RoomType",
-              "confirmationRequired": false,
-              "prompts": {
-                "elicitation": "Elicit.Slot.1615466859269.1188588360910"
-              }
-            }
-          ],
-          "name": "TestIntent",
-          "confirmationRequired": false,
-          "prompts": {}
-        },
-        {
-          "slots": [
-            {
-              "name": "room",
-              "elicitationRequired": true,
-              "type": "RoomType",
-              "confirmationRequired": false,
-              "prompts": {
-                "elicitation": "Elicit.Slot.571326662129.361237573304"
-              }
-            },
-            {
-              "name": "power",
-              "elicitationRequired": false,
-              "type": "PowerType",
-              "confirmationRequired": false,
-              "prompts": {}
-            }
-          ],
-          "name": "ScreenPowerIntent",
-          "confirmationRequired": false,
-          "prompts": {}
-        },
-        {
-          "slots": [
-            {
-              "name": "channel_number",
-              "elicitationRequired": false,
-              "validations": [
+    "interactionModel": {
+        "languageModel": {
+            "invocationName": "alfred please",
+            "intents": [
                 {
-                  "type": "isGreaterThan",
-                  "prompt": "Slot.Validation.1465269215254.1321400833125.1499163442514",
-                  "value": "0"
+                    "name": "NextStepIntent",
+                    "slots": [],
+                    "samples": []
                 },
                 {
-                  "type": "isLessThan",
-                  "prompt": "Slot.Validation.1465269215254.1321400833125.926574839198",
-                  "value": "1000"
+                    "name": "ScreenPowerIntent",
+                    "slots": [
+                        {
+                            "name": "room",
+                            "type": "RoomType",
+                            "multipleValues": {
+                                "enabled": false
+                            }
+                        },
+                        {
+                            "name": "power",
+                            "type": "PowerType"
+                        }
+                    ],
+                    "samples": [
+                        "tv power",
+                        "power the tv",
+                        "tv {power}",
+                        "tv {room}",
+                        "tv in {room}",
+                        "tv {room} in {room}",
+                        "turn the tv {power}",
+                        "turn the tv {power} in {room}"
+                    ]
+                },
+                {
+                    "name": "ChannelIntent",
+                    "slots": [
+                        {
+                            "name": "channel_number",
+                            "type": "AMAZON.NUMBER",
+                            "samples": [
+                                "{channel_number}"
+                            ]
+                        },
+                        {
+                            "name": "room",
+                            "type": "RoomType"
+                        },
+                        {
+                            "name": "station",
+                            "type": "StationType"
+                        }
+                    ],
+                    "samples": [
+                        "{room} to {channel_number}",
+                        "set {room} to {channel_number}",
+                        "{channel_number} in {room}",
+                        "tune in to {channel_number}",
+                        "set channel {room} to {channel_number}",
+                        "channel {channel_number}",
+                        "channel {channel_number} in {room}",
+                        "channel {channel_number} on {room}",
+                        "watch channel {channel_number}",
+                        "watch channel {channel_number} in {room}",
+                        "watch channel {channel_number} on {room}",
+                        "{room} to {station}",
+                        "set {room} to {station}",
+                        "tune in to {station}",
+                        "set channel {room} to {station}",
+                        "{station}",
+                        "{station} in {room}",
+                        "{station} on {room}",
+                        "watch {station}",
+                        "watch {station} in {room}",
+                        "watch {station} on {room}"
+                    ]
+                },
+                {
+                    "name": "AMAZON.CancelIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.HelpIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.StopIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.NavigateHomeIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.FallbackIntent",
+                    "samples": []
+                },
+                {
+                    "name": "TestIntent",
+                    "slots": [
+                        {
+                            "name": "room",
+                            "type": "RoomType"
+                        }
+                    ],
+                    "samples": [
+                        "test",
+                        "test {room}"
+                    ]
+                },
+                {
+                    "name": "RoomIntent",
+                    "slots": [
+                        {
+                            "name": "room",
+                            "type": "RoomType",
+                            "samples": [
+                                "{room} please",
+                                "{room}"
+                            ]
+                        }
+                    ],
+                    "samples": []
                 }
-              ],
-              "type": "AMAZON.NUMBER",
-              "confirmationRequired": false,
-              "prompts": {}
+            ],
+            "types": [
+                {
+                    "name": "RoomType",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "small",
+                                "synonyms": [
+                                    "bedroom"
+                                ]
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "big",
+                                "synonyms": [
+                                    "bing",
+                                    "living room",
+                                    "livingroom"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "PowerType",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "off"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "on"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "StationType",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "tiny"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "huge"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "c.n.n.",
+                                "synonyms": [
+                                    "cnn"
+                                ]
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "abc",
+                                "synonyms": [
+                                    "a.b.c."
+                                ]
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "n.b.c.",
+                                "synonyms": [
+                                    "nbc"
+                                ]
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "c.b.s.",
+                                "synonyms": [
+                                    "cbs"
+                                ]
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "f.o.x.",
+                                "synonyms": [
+                                    "fox"
+                                ]
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "e.s.p.n.",
+                                "synonyms": [
+                                    "espn"
+                                ]
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "h.b.o.",
+                                "synonyms": [
+                                    "hbo"
+                                ]
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "showtime"
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        "dialog": {
+            "intents": [
+                {
+                    "name": "TestIntent",
+                    "confirmationRequired": false,
+                    "prompts": {},
+                    "slots": [
+                        {
+                            "name": "room",
+                            "type": "RoomType",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.1615466859269.1188588360910"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "ScreenPowerIntent",
+                    "confirmationRequired": false,
+                    "prompts": {},
+                    "slots": [
+                        {
+                            "name": "room",
+                            "type": "RoomType",
+                            "confirmationRequired": false,
+                            "elicitationRequired": false,
+                            "prompts": {}
+                        },
+                        {
+                            "name": "power",
+                            "type": "PowerType",
+                            "confirmationRequired": false,
+                            "elicitationRequired": false,
+                            "prompts": {}
+                        }
+                    ]
+                },
+                {
+                    "name": "ChannelIntent",
+                    "confirmationRequired": false,
+                    "prompts": {},
+                    "slots": [
+                        {
+                            "name": "channel_number",
+                            "type": "AMAZON.NUMBER",
+                            "confirmationRequired": false,
+                            "elicitationRequired": false,
+                            "prompts": {},
+                            "validations": [
+                                {
+                                    "type": "isGreaterThan",
+                                    "prompt": "Slot.Validation.1465269215254.1321400833125.1499163442514",
+                                    "value": "0"
+                                },
+                                {
+                                    "type": "isLessThan",
+                                    "prompt": "Slot.Validation.1465269215254.1321400833125.926574839198",
+                                    "value": "1000"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "room",
+                            "type": "RoomType",
+                            "confirmationRequired": false,
+                            "elicitationRequired": false,
+                            "prompts": {}
+                        }
+                    ]
+                },
+                {
+                    "name": "RoomIntent",
+                    "confirmationRequired": false,
+                    "prompts": {},
+                    "slots": [
+                        {
+                            "name": "room",
+                            "type": "RoomType",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.474064638967.608149370909"
+                            }
+                        }
+                    ]
+                }
+            ],
+            "delegationStrategy": "ALWAYS"
+        },
+        "prompts": [
+            {
+                "id": "Slot.Validation.1164718167507.1318402377639.1670312564445",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "which room"
+                    }
+                ]
             },
             {
-              "name": "room",
-              "elicitationRequired": false,
-              "type": "RoomType",
-              "confirmationRequired": false,
-              "prompts": {}
+                "id": "Elicit.Slot.1164718167507.1318402377639",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "which room"
+                    }
+                ]
+            },
+            {
+                "id": "Confirm.Intent.38014073699",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Is {room} the right room?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.1615466859269.1188588360910",
+                "variations": [
+                    {
+                        "type": "SSML",
+                        "value": "<speak><voice name='Matthew'>Which room</voice></speak>"
+                    }
+                ]
+            },
+            {
+                "id": "Confirm.Slot.579492825225.1669119250559",
+                "variations": [
+                    {
+                        "type": "SSML",
+                        "value": "<speak><voice name='Matthew'>is {room} ok?</voice></speak>"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.571326662129.361237573304",
+                "variations": [
+                    {
+                        "type": "SSML",
+                        "value": "<speak><voice name='Matthew'>Which room</voice></speak>"
+                    }
+                ]
+            },
+            {
+                "id": "Slot.Validation.1465269215254.1321400833125.1499163442514",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Must be greater than zero"
+                    }
+                ]
+            },
+            {
+                "id": "Slot.Validation.1465269215254.1321400833125.926574839198",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Must be lower than one thousand"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.474064638967.608149370909",
+                "variations": [
+                    {
+                        "type": "SSML",
+                        "value": "<speak><voice name='Matthew'>Which room?</voice></speak>"
+                    }
+                ]
             }
-          ],
-          "name": "ChannelIntent",
-          "confirmationRequired": false,
-          "prompts": {}
-        }
-      ],
-      "delegationStrategy": "ALWAYS"
-    },
-    "languageModel": {
-      "intents": [
-        {
-          "slots": [
-            {
-              "name": "room",
-              "type": "RoomType"
-            }
-          ],
-          "name": "TestIntent",
-          "samples": [
-            "test",
-            "test {room}"
-          ]
-        },
-        {
-          "slots": [],
-          "name": "NextStepIntent",
-          "samples": []
-        },
-        {
-          "slots": [
-            {
-              "multipleValues": {
-                "enabled": false
-              },
-              "name": "room",
-              "type": "RoomType",
-              "samples": [
-                "{room}"
-              ]
-            },
-            {
-              "name": "power",
-              "type": "PowerType"
-            }
-          ],
-          "name": "ScreenPowerIntent",
-          "samples": [
-            "tv power",
-            "power the tv",
-            "tv {power}",
-            "tv {room}",
-            "tv in {room}",
-            "tv {room} in {room}",
-            "turn the tv {power}",
-            "turn the tv {power} in {room}"
-          ]
-        },
-        {
-          "name": "AMAZON.CancelIntent",
-          "samples": []
-        },
-        {
-          "name": "AMAZON.HelpIntent",
-          "samples": []
-        },
-        {
-          "name": "AMAZON.StopIntent",
-          "samples": []
-        },
-        {
-          "name": "AMAZON.NavigateHomeIntent",
-          "samples": []
-        },
-        {
-          "name": "AMAZON.FallbackIntent",
-          "samples": []
-        },
-        {
-          "slots": [],
-          "name": "ScreenPower",
-          "samples": []
-        },
-        {
-          "slots": [
-            {
-              "name": "channel_number",
-              "type": "AMAZON.NUMBER",
-              "samples": [
-                "{channel_number}"
-              ]
-            },
-            {
-              "name": "room",
-              "type": "RoomType"
-            },
-            {
-              "name": "station",
-              "type": "StationType"
-            }
-          ],
-          "name": "ChannelIntent",
-          "samples": [
-            "{room} to {channel_number}",
-            "set {room} to {channel_number}",
-            "{channel_number} in {room}",
-            "tune in to {channel_number}",
-            "set channel {room} to {channel_number}",
-            "channel {channel_number}",
-            "channel {channel_number} in {room}",
-            "channel {channel_number} on {room}",
-            "watch channel {channel_number}",
-            "watch channel {channel_number} in {room}",
-            "watch channel {channel_number} on {room}",
-            "{room} to {station}",
-            "set {room} to {station}",
-            "tune in to {station}",
-            "set channel {room} to {station}",
-            "{station}",
-            "{station} in {room}",
-            "{station} on {room}",
-            "watch {station}",
-            "watch {station} in {room}",
-            "watch {station} on {room}"
-          ]
-        }
-      ],
-      "types": [
-        {
-          "values": [
-            {
-              "name": {
-                "synonyms": [
-                  "bedroom"
-                ],
-                "value": "small"
-              }
-            },
-            {
-              "name": {
-                "synonyms": [
-                  "bing",
-                  "living room",
-                  "livingroom"
-                ],
-                "value": "big"
-              }
-            }
-          ],
-          "name": "RoomType"
-        },
-        {
-          "values": [
-            {
-              "name": {
-                "value": "off"
-              }
-            },
-            {
-              "name": {
-                "value": "on"
-              }
-            }
-          ],
-          "name": "PowerType"
-        },
-        {
-          "values": [
-            {
-              "name": {
-                "value": "tiny"
-              }
-            },
-            {
-              "name": {
-                "value": "huge"
-              }
-            },
-            {
-              "name": {
-                "synonyms": [
-                  "cnn"
-                ],
-                "value": "c.n.n."
-              }
-            },
-            {
-              "name": {
-                "synonyms": [
-                  "a.b.c."
-                ],
-                "value": "abc"
-              }
-            },
-            {
-              "name": {
-                "synonyms": [
-                  "nbc"
-                ],
-                "value": "n.b.c."
-              }
-            },
-            {
-              "name": {
-                "synonyms": [
-                  "cbs"
-                ],
-                "value": "c.b.s."
-              }
-            },
-            {
-              "name": {
-                "synonyms": [
-                  "fox"
-                ],
-                "value": "f.o.x."
-              }
-            },
-            {
-              "name": {
-                "synonyms": [
-                  "espn"
-                ],
-                "value": "e.s.p.n."
-              }
-            },
-            {
-              "name": {
-                "synonyms": [
-                  "hbo"
-                ],
-                "value": "h.b.o."
-              }
-            },
-            {
-              "name": {
-                "value": "showtime"
-              }
-            }
-          ],
-          "name": "StationType"
-        }
-      ],
-      "invocationName": "alfred please"
-    },
-    "prompts": [
-      {
-        "variations": [
-          {
-            "type": "PlainText",
-            "value": "which room"
-          }
-        ],
-        "id": "Slot.Validation.1164718167507.1318402377639.1670312564445"
-      },
-      {
-        "variations": [
-          {
-            "type": "PlainText",
-            "value": "which room"
-          }
-        ],
-        "id": "Elicit.Slot.1164718167507.1318402377639"
-      },
-      {
-        "variations": [
-          {
-            "type": "PlainText",
-            "value": "Is {room} the right room?"
-          }
-        ],
-        "id": "Confirm.Intent.38014073699"
-      },
-      {
-        "variations": [
-          {
-            "type": "SSML",
-            "value": "\u003cspeak\u003e\u003cvoice name\u003d\u0027Matthew\u0027\u003eWhich room\u003c/voice\u003e\u003c/speak\u003e"
-          }
-        ],
-        "id": "Elicit.Slot.1615466859269.1188588360910"
-      },
-      {
-        "variations": [
-          {
-            "type": "SSML",
-            "value": "\u003cspeak\u003e\u003cvoice name\u003d\u0027Matthew\u0027\u003eis {room} ok?\u003c/voice\u003e\u003c/speak\u003e"
-          }
-        ],
-        "id": "Confirm.Slot.579492825225.1669119250559"
-      },
-      {
-        "variations": [
-          {
-            "type": "SSML",
-            "value": "\u003cspeak\u003e\u003cvoice name\u003d\u0027Matthew\u0027\u003eWhich room\u003c/voice\u003e\u003c/speak\u003e"
-          }
-        ],
-        "id": "Elicit.Slot.571326662129.361237573304"
-      },
-      {
-        "variations": [
-          {
-            "type": "PlainText",
-            "value": "Must be greater than zero"
-          }
-        ],
-        "id": "Slot.Validation.1465269215254.1321400833125.1499163442514"
-      },
-      {
-        "variations": [
-          {
-            "type": "PlainText",
-            "value": "Must be lower than one thousand"
-          }
-        ],
-        "id": "Slot.Validation.1465269215254.1321400833125.926574839198"
-      }
-    ]
-  }
+        ]
+    }
 }
