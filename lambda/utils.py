@@ -2,7 +2,10 @@ import logging
 import json
 from datetime import datetime
 import requests
-from configs import echo_device_map
+from configs import echo_device_map, room_map, valid_devices, station_to_channel_map, intents_command_map, \
+    device_names_map
+
+
 def to_dict(obj):
     if isinstance(obj, list):
         return [to_dict(item) for item in obj]
@@ -64,43 +67,6 @@ def send_request(url, payload={}, headers={}):
         print(f"An error occurred: {e}")
         return f'Error.'
 
-device_map = {
-    "tv": {
-        "small": {
-            "device": "bedroom-tv",
-            "short": "stv"
-        },
-        "big": {
-            "device": "living-room-tv",
-            "short": "btv"
-        }
-    },
-    "tivo": {
-        "small": {
-            "device": "bedroom-tivo",
-            "short": "st"
-        },
-        "big": {
-            "device": "living-room-tivo",
-            "short": "bt"
-        }
-    }
-}
-room_map = {'small': 'small', 'bedroom': 'small', 'big': 'big', 'livingroom': 'big', 'desk': 'big'}
-valid_devices = ['tv', 'tivo']
-stations = {
-    "cnn": 600, "abc": 507, "nbc": 502, "cbs": 502, "fox": 505, "espn": 570, "hbo": 899, "showtime": 865,
-    "tiny": 4, "huge": 1000
-}
-commands_map = {
-    "ScreenPowerIntent": {
-        "device": "tv",
-    },
-    "ChannelIntent": {
-        "device": "tivo",
-    }
-}
-
 def room_echo_device_in(handler_input):
     device_name = echo_device_name(handler_input)
     return room_map.get(device_name)
@@ -108,28 +74,17 @@ def room_echo_device_in(handler_input):
 def get_device(room, device_type='tv', short=False):
     if room not in room_map or device_type not in valid_devices:
         return None
-    return device_map[device_type][room]['short' if short else 'device']
+    return device_names_map[device_type][room]['short' if short else 'device']
 
-def send_channel_request(room, channel=None, station=None):
-    device = get_device(room, 'tivo', short=True)
-    if not device:
-        return f"{device} not found in {room}"
-    slug = ''
-    if station:
-        channel = stations.get(station)
-    if channel is None:
-        return f"No station for {room}"
-    for n in list(str(channel)):
-        slug += f"{device}:{n},"
-    slug = slug[:-1]
-    url = f"https://yo372002.ngrok.io/hubs/harmony-hub/commandlist/{slug}"
-    return send_request(url)
-
-def send_generic_request(session_attributes):
+def process_request(session_attributes):
     intent_name = session_attributes.get('intent_name')
-    device_type = commands_map.get(intent_name)['device']
+    device_type = intents_command_map.get(intent_name)['device']
+    if not device_type:
+        action = session_attributes.get('action')
+        device_type = intents_command_map.get(intent_name)['action_device_map'][action][0]
+        print(f"Device type: {device_type} action: {action}")
     room = session_attributes.get('intended_room_name')
-    device = device_map[device_type][room]['short']
+    device = device_names_map[device_type][room]['short']
     if not device:
         return f"No device found in {room} for {intent_name}"
     slug = ''
@@ -137,10 +92,18 @@ def send_generic_request(session_attributes):
         channel = session_attributes.get('channel_number')
         station = session_attributes.get('intended_station')
         if station:
-            channel = stations.get(station)
+            channel = station_to_channel_map.get(station)
         if channel is None:
             return f"No station for {room}"
         commands = list(str(channel))
+    elif intent_name == 'ScreenActionIntent':
+        action = session_attributes.get('action')
+        command = intents_command_map.get(intent_name)['action_device_map'][action][1]
+        if command and isinstance(command, dict):
+            command = command.get(room)
+        if not command:
+            return f"No command found for {action} in {room}"
+        commands = [ command ]
     else:
         commands = ['power-toggle'] # session_attributes.get('power')
     for command in commands:

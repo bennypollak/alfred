@@ -1,13 +1,14 @@
+import json
 import os
 import boto3
 from botocore.exceptions import ClientError
+# import yaml
 
 bucket_name = 'fd531fda-6127-49a9-b6dc-5d1754221ed0-us-east-1'
 file_key = 'test.txt'
 s3_client = boto3.client('s3')
 
 def s3_read(bucket, key):
-    """Read the content of an S3 file."""
     response = s3_client.get_object(Bucket=bucket, Key=key)
     content = response['Body'].read().decode('utf-8')
     return content
@@ -24,5 +25,23 @@ def s3_write(content, bucket=bucket_name, key=file_key, append=True, newline=Tru
                 pass
             else:
                 raise
-        s3_client.put_object(Bucket=bucket, Key=key, Body=content.encode('utf-8'))
+    s3_client.put_object(Bucket=bucket, Key=key, Body=content.encode('utf-8'))
 
+# def s3_read_yaml(bucket, key):
+#     content = s3_read(bucket, key)
+#     return yaml.safe_load(content)
+#
+# def s3_write_yaml(content, bucket=bucket_name, key=file_key):
+#     content = yaml.dump(content)
+#     s3_write(content, bucket, key)
+
+def get_config():
+    try:
+        config = json.loads(s3_read(bucket_name, 'config.json'))
+    except Exception as e:
+        config = { "debug": True }
+    return config
+def write_config(config):
+    content = json.dumps(config)
+    print(f"config: {config}")
+    s3_write(content, bucket_name, 'config.json', append=False, newline=False)

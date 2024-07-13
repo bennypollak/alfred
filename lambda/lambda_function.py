@@ -20,13 +20,14 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 import lambda_defaults
 import lambda_deprecated
-import utils
+import utils, configs
 
 class LaunchRequestHandler(AbstractRequestHandler):
     def can_handle(self, handler_input):
         return is_request_type("LaunchRequest")(handler_input)
     def handle(self, handler_input):
         session_attributes = handler_input.attributes_manager.session_attributes
+        debug = s3.get_config().get('debug', True)
         user_name = 'Benny'
         session_attributes['user_name'] = user_name
         session_attributes['intent_name'] = "LaunchRequest"
@@ -37,12 +38,29 @@ class LaunchRequestHandler(AbstractRequestHandler):
         s3.s3_write(text)
         print(text)
 
-        speak_output = utils.alfred_voice(f"Yes {user_name} on {echo_device_name}?")
+        speak_text = f"Yes {user_name} on {echo_device_name}?" if debug else f"Yes {user_name}?"
+        speak_output = utils.alfred_voice(speak_text)
         reprompt_output = utils.alfred_voice("Yes?")
         return (handler_input.response_builder.speak(speak_output)
                 .set_card(SimpleCard(f"Alfred", f"Hi {user_name} how can I help you?"))
                 .ask(reprompt_output).response
                 )
+
+class SetConfigIntentHandler(AbstractRequestHandler):
+    def can_handle(self, handler_input):
+        return is_intent_name("SetConfigIntent")(handler_input)
+    def handle(self, handler_input):
+        intent_request = handler_input.request_envelope.request
+        session_attributes = handler_input.attributes_manager.session_attributes
+        original_debug, intended_debug = utils.slot_value(handler_input, 'on_off')
+        config = s3.get_config()
+        config['debug'] = True if intended_debug == 'on' else False
+        s3.write_config(config)
+        speak_text = f"setting intended_debug {intended_debug} original_debug: {original_debug}"
+        speak_output = utils.alfred_voice(speak_text)
+        return (handler_input.response_builder.speak(speak_output)
+            .set_card(SimpleCard(f"Alfred", speak_text))
+            .set_should_end_session(True).response)
 
 class ScreenPowerIntentHandler(AbstractRequestHandler):
     def can_handle(self, handler_input):
@@ -110,6 +128,31 @@ class ChannelIntentHandler(AbstractRequestHandler):
         session_attributes['intended_room_name'] = intended_room_name
         return handle_request(handler_input, session_attributes)
 
+class ScreenActionIntentHandler(AbstractRequestHandler):
+    def can_handle(self, handler_input):
+        return ask_utils.is_intent_name("ScreenActionIntent")(handler_input)
+    def handle(self, handler_input):
+        session_attributes = handler_input.attributes_manager.session_attributes
+        session_attributes['intent_name'] = get_intent_name(handler_input)
+        user_name = session_attributes['user_name']
+        action, intended_action = utils.slot_value(handler_input, 'action')
+        session_attributes['action'] = action
+        session_attributes['intended_action'] = intended_action
+        room_name, intended_room_name = utils.slot_value(handler_input, 'room')
+        if not room_name:
+            room_name = intended_room_name = utils.room_echo_device_in(handler_input)
+        if not room_name:
+            device_name = utils.echo_device_name(handler_input)
+            speak_output = utils.alfred_voice(f"action for which room from {device_name}?")
+            return (handler_input.response_builder.speak(speak_output)
+                    .speak(speak_output)
+                    .add_directive(DelegateDirective(updated_intent=Intent(name="RoomIntent")))
+                    .response
+                    )
+        session_attributes['original_room_name'] = room_name
+        session_attributes['intended_room_name'] = intended_room_name
+        return handle_request(handler_input, session_attributes)
+
 class NextStepIntentHandler(AbstractRequestHandler):
     def can_handle(self, handler_input):
         return is_intent_name("NextStepIntent")(handler_input)
@@ -126,7 +169,7 @@ def handle_request(handler_input, session_attributes):
     user_name = session_attributes.get('user_name')
     intent_name = session_attributes.get('intent_name')
     intent_name = utils.camel_to_space(intent_name)
-    send_result = utils.send_generic_request(session_attributes)
+    send_result = utils.process_request(session_attributes)
     output_text = f"I did {intent_name} for {room_name} and got {send_result}"
     speak_output = utils.alfred_voice(output_text)
     print(output_text)
@@ -137,6 +180,8 @@ def handle_request(handler_input, session_attributes):
 sb = SkillBuilder()
 sb.add_request_handler(LaunchRequestHandler())
 sb.add_request_handler(ScreenPowerIntentHandler())
+sb.add_request_handler(SetConfigIntentHandler())
+sb.add_request_handler(ScreenActionIntentHandler())
 sb.add_request_handler(RoomIntentHandler())
 sb.add_request_handler(ChannelIntentHandler())
 sb.add_request_handler(NextStepIntentHandler())

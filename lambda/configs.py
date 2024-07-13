@@ -7,3 +7,50 @@ echo_device_map = {
     "amzn1.ask.device.AMA4UBAJ5A3XUSANPNJWCEHQIYC5FWEARFWN3VKIKUQIV7Q72FXGYLCOXAS56FRTSP2FBYLJKBBYTOLZRX35YKQNJ6QEU7QFWDIXATZTYECP2VYOGV46OHHW35GEOGKOIUS536EVP4NOZ55R5JW7CKKAO4IEZNCXAV3YVT6ARRESWAGAQTRXG65VXYWJGYITC2ABLGONYSMCDLYH": "iphone",
     "amzn1.ask.device.AMAZ5FPGYM43LH3SO7RAQX7UEJFN4Y5IWUVHSMZDNEKHBKUXYG3VOTJAHFHSH3ENLDNHZQINHBCTVYFBLCRWRZKKWASCBORGOILNEMF5WMZ4NTUBF5FW4FK7SFLVJ6G2GQ3TKHXUEPHKI7NYCZXZUY6L3DIZQ6UFJRUSNQVRITLLHSN2YH3QDZ36DM2UJ32NVPPQJH2ANYSFY363": "desk"
 }
+room_map = {'small': 'small', 'bedroom': 'small', 'big': 'big', 'livingroom': 'big', 'desk': 'big'}
+valid_devices = ['tv', 'tivo']
+station_to_channel_map = {
+    "cnn": 600, "abc": 507, "nbc": 502, "cbs": 502, "fox": 505, "espn": 570, "hbo": 899, "showtime": 865,
+    "tiny": 4, "huge": 1000
+}
+intents_command_map = {
+    "ScreenPowerIntent": {
+        "device": "tv",
+    },
+    "ChannelIntent": {
+        "device": "tivo",
+    },
+    "ScreenActionIntent": {
+        "device": None,
+        "action_device_map": {
+            "power": [ "tv", "power-toggle" ],
+            "mute": [ "tv", "mute" ],
+            "roku": [ "tv", "roku" ],
+            "pause": ["tivo", "pause"],
+            "fire tv": [ "tv", {"big": "inputhdmi3", "small": "inputhdmi1"} ],
+            "cable": [ "tv", {"big": "inputhdmi2v2", "small": "inputhdmi3"} ],
+        }
+    }
+}
+device_names_map = {
+    "tv": {
+        "small": {
+            "device": "bedroom-tv",
+            "short": "stv"
+        },
+        "big": {
+            "device": "living-room-tv",
+            "short": "btv"
+        }
+    },
+    "tivo": {
+        "small": {
+            "device": "bedroom-tivo",
+            "short": "st"
+        },
+        "big": {
+            "device": "living-room-tivo",
+            "short": "bt"
+        }
+    }
+}
