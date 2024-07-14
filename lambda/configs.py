@@ -44,5 +44,15 @@ commands_map = {
         }
     }
 
+say_request_responses = {
+    "WhyAlfredIntent": {
+        "text": "In the movie \"The Demon Seed,\" the machine the protagonist speaks to at home is named Alfred. Alfred is the home computer system that becomes controlled by the artificial intelligence Proteus IV.",
+        "next_text": "Would you like to know more about Alfred?",
+        "next_intent": "WhyAlfredMoreIntent"
+    },
+    "WhyAlfredMoreIntent": {
+        "text": "At the end of the movie, Alfred impregnate the female protagonist with a demon seed. You don't want to hear more."
+    }
+}
 if __name__ == "__main__":
     intents = {}
