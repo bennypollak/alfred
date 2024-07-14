@@ -7,3 +7,8 @@ https://github.com/alexa-samples/skill-sample-python-smarthome-switch/tree/maste
 https://alexa-skills-kit-python-sdk.readthedocs.io/en/latest/api/core.html
 https://www.youtube.com/watch?v=6VCA-pQrVHs
 https://github.com/alexa
+## TODO
+- refactor tv power
+- Add text intents
+- get rid of intended and use slot 
+- roku and chrome in big

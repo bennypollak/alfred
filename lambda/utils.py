@@ -2,9 +2,8 @@ import logging
 import json
 from datetime import datetime
 import requests
-from configs import echo_device_map, room_map, valid_devices, station_to_channel_map, intents_command_map, \
-    device_names_map
-
+from configs import echo_device_map, room_map, valid_devices, station_to_channel_map, \
+    device_names_map, commands_map
 
 def to_dict(obj):
     if isinstance(obj, list):
@@ -71,24 +70,26 @@ def room_echo_device_in(handler_input):
     device_name = echo_device_name(handler_input)
     return room_map.get(device_name)
 
-def get_device(room, device_type='tv', short=False):
-    if room not in room_map or device_type not in valid_devices:
-        return None
-    return device_names_map[device_type][room]['short' if short else 'device']
-
 def process_request(session_attributes):
     intent_name = session_attributes.get('intent_name')
-    device_type = intents_command_map.get(intent_name)['device']
-    if not device_type:
-        action = session_attributes.get('action')
-        device_type = intents_command_map.get(intent_name)['action_device_map'][action][0]
-        print(f"Device type: {device_type} action: {action}")
     room = session_attributes.get('intended_room_name')
-    device = device_names_map[device_type][room]['short']
-    if not device:
-        return f"No device found in {room} for {intent_name}"
-    slug = ''
-    if intent_name == 'ChannelIntent':
+    action = session_attributes.get('action')
+    if not action:
+        return f"No action defined for {intent_name}"
+    command_info = commands_map.get(action)
+    device = command_info['device']
+    device = device_names_map[device][room]
+    commands = []
+    if intent_name == 'ScreenActionIntent':
+        command = command_info['command']
+        print(f"Action: {action}, Command: {command}")
+        if command and isinstance(command, dict):
+            command = command.get(room)
+            print(f"Command: {command}")
+        if not command:
+            return f"No command found for {action} in {room}"
+        commands = [command]
+    elif intent_name == 'ChannelIntent':
         channel = session_attributes.get('channel_number')
         station = session_attributes.get('intended_station')
         if station:
@@ -96,16 +97,11 @@ def process_request(session_attributes):
         if channel is None:
             return f"No station for {room}"
         commands = list(str(channel))
-    elif intent_name == 'ScreenActionIntent':
-        action = session_attributes.get('action')
-        command = intents_command_map.get(intent_name)['action_device_map'][action][1]
-        if command and isinstance(command, dict):
-            command = command.get(room)
-        if not command:
-            return f"No command found for {action} in {room}"
-        commands = [ command ]
     else:
-        commands = ['power-toggle'] # session_attributes.get('power')
+        command = command_info.get('command')
+        commands = [command]
+
+    slug = ''
     for command in commands:
         slug += f"{device}:{command},"
     slug = slug[:-1]

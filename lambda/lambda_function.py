@@ -68,7 +68,9 @@ class ScreenPowerIntentHandler(AbstractRequestHandler):
     def handle(self, handler_input):
         session_attributes = handler_input.attributes_manager.session_attributes
         session_attributes['intent_name'] = get_intent_name(handler_input)
-        power, intended_power = utils.slot_value(handler_input, 'power', 'on')
+        session_attributes['action'] = 'tv-power'
+        power, intended_power = utils.slot_value(handler_input, 'power', 'toggle')
+        print(f"Power: {power}, Intended Power: {intended_power}")
         session_attributes['power'] = power
         session_attributes['intended_power'] = intended_power
         room_name, intended_room_name = utils.slot_value(handler_input, 'room')
@@ -82,6 +84,13 @@ class ScreenPowerIntentHandler(AbstractRequestHandler):
                     .add_directive(DelegateDirective(updated_intent=Intent(name="RoomIntent")))
                     .response
                     )
+        # output_text = f"Power: {power}, Intended Power: {intended_power}, Room Name: {room_name}, Intended Room Name: {intended_room_name}"
+        # speak_output = utils.alfred_voice(output_text)
+        # print(output_text)
+        # return (handler_input.response_builder.speak(speak_output)
+        #         .set_card(SimpleCard(f"Alfred", f"Power: {power}, Intended Power: {intended_power}"))
+        #         .set_should_end_session(False).response)
+        # print(f"Room Name: {room_name}, Intended Room Name: {intended_room_name}")
         session_attributes['original_room_name'] = room_name
         session_attributes['intended_room_name'] = intended_room_name
         return handle_request(handler_input, session_attributes)
@@ -104,8 +113,9 @@ class ChannelIntentHandler(AbstractRequestHandler):
         return ask_utils.is_intent_name("ChannelIntent")(handler_input)
     def handle(self, handler_input):
         session_attributes = handler_input.attributes_manager.session_attributes
+        debug = session_attributes['debug']
         session_attributes['intent_name'] = get_intent_name(handler_input)
-        user_name = session_attributes['user_name']
+        session_attributes['action'] = 'channel'
         channel_number, intended_channel_number = utils.slot_value(handler_input, 'channel_number')
         station, intended_station = utils.slot_value(handler_input, 'station')
         if not channel_number and not station:

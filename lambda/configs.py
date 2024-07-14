@@ -1,3 +1,5 @@
+import json
+
 echo_device_map = {
     "amzn1.ask.device.AMA6SNV7ZV7UGFBNWNIETNX7QQGECL34YVRGDCZWMDVJP5OORNHBIGCNLAHEBTRS625BU7J3GFUXWWGNVOT5RM3DEUVRTEWSPJFHIBK6LDBUPNRSOL427OWPOVZVIV2IPE4RZ7KLVBJ3DCDC55E3XRRLKKVQS5ZXCUZH6UTGPVPBGEU7AB2KILZM7BJB54C64BCETAMMIGBRJBSD": "livingroom",
     "amzn1.ask.device.AMAXBAW7JBUZYYPMO6WS4DQCGGCX7PWI63LRD626DQJMJXEDRHPM7FA3DUNXIQUHFSX57ZPXYCI5AFM7RHDHVIATSKHCURO4ETXQXNHTYNV4WSQV4DB2TZWCIPSCF6UF2JGNJRQF2L5W4AYRBJD2MO6P4TH2VLN4SK67D2EFYGO4TX3BKUNXGIHXKTDZIS62ROMBW": "retired",
@@ -10,47 +12,37 @@ echo_device_map = {
 room_map = {'small': 'small', 'bedroom': 'small', 'big': 'big', 'livingroom': 'big', 'desk': 'big'}
 valid_devices = ['tv', 'tivo']
 station_to_channel_map = {
-    "cnn": 600, "abc": 507, "nbc": 502, "cbs": 502, "fox": 505, "espn": 570, "hbo": 899, "showtime": 865,
+    "cnn": 600, "abc": 507, "nbc": 502, "cbs": 502, "fox": 505, "espn": 570, "hbo": 899, "showtime": 865, "tmc": 230,
     "tiny": 4, "huge": 1000
 }
-intents_command_map = {
-    "ScreenPowerIntent": {
-        "device": "tv",
-    },
-    "ChannelIntent": {
-        "device": "tivo",
-    },
-    "ScreenActionIntent": {
-        "device": None,
-        "action_device_map": {
-            "power": [ "tv", "power-toggle" ],
-            "mute": [ "tv", "mute" ],
-            "roku": [ "tv", "roku" ],
-            "pause": ["tivo", "pause"],
-            "fire tv": [ "tv", {"big": "inputhdmi3", "small": "inputhdmi1"} ],
-            "cable": [ "tv", {"big": "inputhdmi2v2", "small": "inputhdmi3"} ],
-        }
-    }
-}
 device_names_map = {
-    "tv": {
-        "small": {
-            "device": "bedroom-tv",
-            "short": "stv"
+    "tv": { "small": "stv", "big": "btv" },
+    "tivo": { "small": "st", "big": "bt" }
+}
+commands_map = {
+        "channel": { "device": "tivo"  },
+        "tv-power": { "device": "tv", "command": "power-toggle" },
+        "mute": { "device": "tv", "command": "mute" },
+        "pause": { "device": "tivo", "command": "pause" },
+        "louder": {
+            "device": "tv", "command": "volume-up", "count": 3
         },
-        "big": {
-            "device": "living-room-tv",
-            "short": "btv"
-        }
-    },
-    "tivo": {
-        "small": {
-            "device": "bedroom-tivo",
-            "short": "st"
+        "softer": {
+            "device": "tv", "command": "volume-down", "count": 3
         },
-        "big": {
-            "device": "living-room-tivo",
-            "short": "bt"
+        "fire tv": {
+            "device": "tv",
+            "command": {
+                "big": "inputhdmi3", "small": "inputhdmi1"
+            }
+        },
+        "cable": {
+            "device": "tv",
+            "command": {
+                "big": "inputhdmi2v2", "small": "inputhdmi3"
+            }
         }
     }
-}
+
+if __name__ == "__main__":
+    intents = {}

@@ -24,12 +24,13 @@
                         }
                     ],
                     "samples": [
+                        "{room} tv {power}",
                         "tv power",
                         "power the tv",
                         "tv {power}",
                         "tv {room}",
                         "tv in {room}",
-                        "tv {room} in {room}",
+                        "tv {power} in {room}",
                         "turn the tv {power}",
                         "turn the tv {power} in {room}"
                     ]
@@ -54,7 +55,10 @@
                         }
                     ],
                     "samples": [
+                        "{room} channel {channel_number}",
                         "{room} to {channel_number}",
+                        "{room} {channel_number}",
+                        "{room} {station}",
                         "set {room} to {channel_number}",
                         "{channel_number} in {room}",
                         "tune in to {channel_number}",
@@ -123,6 +127,44 @@
                         }
                     ],
                     "samples": []
+                },
+                {
+                    "name": "ScreenActionIntent",
+                    "slots": [
+                        {
+                            "name": "action",
+                            "type": "ScreenActionType",
+                            "samples": [
+                                "do {action} please",
+                                "do {action}",
+                                "{action} please",
+                                "{action}"
+                            ]
+                        },
+                        {
+                            "name": "room",
+                            "type": "RoomType"
+                        }
+                    ],
+                    "samples": [
+                        "{room} {action}",
+                        "{action} {room}",
+                        "{action} in {room}",
+                        "{action}"
+                    ]
+                },
+                {
+                    "name": "SetConfigIntent",
+                    "slots": [
+                        {
+                            "name": "on_off",
+                            "type": "OnOff"
+                        }
+                    ],
+                    "samples": [
+                        "debug {on_off}",
+                        "set debug {on_off}"
+                    ]
                 }
             ],
             "types": [
@@ -179,9 +221,9 @@
                         },
                         {
                             "name": {
-                                "value": "c.n.n.",
+                                "value": "cnn",
                                 "synonyms": [
-                                    "cnn"
+                                    "c.n.n"
                                 ]
                             }
                         },
@@ -236,6 +278,51 @@
                         {
                             "name": {
                                 "value": "showtime"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "ScreenActionType",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "roku"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "cable"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "fire tv"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "pause"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "mute"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "OnOff",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "off"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "on"
                             }
                         }
                     ]
@@ -311,6 +398,13 @@
                             "confirmationRequired": false,
                             "elicitationRequired": false,
                             "prompts": {}
+                        },
+                        {
+                            "name": "station",
+                            "type": "StationType",
+                            "confirmationRequired": false,
+                            "elicitationRequired": false,
+                            "prompts": {}
                         }
                     ]
                 },
@@ -326,6 +420,45 @@
                             "elicitationRequired": true,
                             "prompts": {
                                 "elicitation": "Elicit.Slot.474064638967.608149370909"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "ScreenActionIntent",
+                    "confirmationRequired": false,
+                    "prompts": {},
+                    "slots": [
+                        {
+                            "name": "action",
+                            "type": "ScreenActionType",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.503276575566.517830686261"
+                            }
+                        },
+                        {
+                            "name": "room",
+                            "type": "RoomType",
+                            "confirmationRequired": false,
+                            "elicitationRequired": false,
+                            "prompts": {}
+                        }
+                    ]
+                },
+                {
+                    "name": "SetConfigIntent",
+                    "confirmationRequired": false,
+                    "prompts": {},
+                    "slots": [
+                        {
+                            "name": "on_off",
+                            "type": "OnOff",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.996785815069.1288032450560"
                             }
                         }
                     ]
@@ -412,6 +545,24 @@
                     {
                         "type": "SSML",
                         "value": "<speak><voice name='Matthew'>Which room?</voice></speak>"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.503276575566.517830686261",
+                "variations": [
+                    {
+                        "type": "SSML",
+                        "value": "<speak><voice name='Matthew'>What?</voice></speak>"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.996785815069.1288032450560",
+                "variations": [
+                    {
+                        "type": "SSML",
+                        "value": "<speak><voice name='Matthew'>on or off?</voice></speak>"
                     }
                 ]
             }
