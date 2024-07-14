@@ -7,7 +7,8 @@ echo_device_map = {
     "amzn1.ask.device.AMAXJAPA4OTSER5H6YZ2LVKHQAKL4FTPBEWPSFMKEDCT5Z7UF3EYUREQ7O7F2SHLZJPYFRY3HY4E2DAFNUZYRUD6PUSGNN7ZWAH4MPOJL2UGRFSGEHVTSKVLHFISTGH3UFYSVAIOGHG4ONSE6IIJVYWAUWZRQW2SOWTRHLOTBEVTWSFRRNQA646J7VHEH3D2GDHI22DYP2YX6KI": "kitchen",
     "amzn1.ask.device.AMA5R44WCBSXEWTJ4ILRVBZNPLXHB24I5FTG5E6EQ5P5KB2GDX3IISOHCN6TNXLCSNPNWITESBC4J7DGJDIEN62D2XOVG3U4XRVGP4P6M2YFUEFNDLLGHPMULKO43KM7J5H75ZEB5GPJ77TVQUF7VRGRPRUSBUYXVJ2BP6TY5XTYENYJY733MLJ3NHTDAUD7SKZDWJD6NPJL3CQ": "test",
     "amzn1.ask.device.AMA4UBAJ5A3XUSANPNJWCEHQIYC5FWEARFWN3VKIKUQIV7Q72FXGYLCOXAS56FRTSP2FBYLJKBBYTOLZRX35YKQNJ6QEU7QFWDIXATZTYECP2VYOGV46OHHW35GEOGKOIUS536EVP4NOZ55R5JW7CKKAO4IEZNCXAV3YVT6ARRESWAGAQTRXG65VXYWJGYITC2ABLGONYSMCDLYH": "iphone",
-    "amzn1.ask.device.AMAZ5FPGYM43LH3SO7RAQX7UEJFN4Y5IWUVHSMZDNEKHBKUXYG3VOTJAHFHSH3ENLDNHZQINHBCTVYFBLCRWRZKKWASCBORGOILNEMF5WMZ4NTUBF5FW4FK7SFLVJ6G2GQ3TKHXUEPHKI7NYCZXZUY6L3DIZQ6UFJRUSNQVRITLLHSN2YH3QDZ36DM2UJ32NVPPQJH2ANYSFY363": "desk"
+    "amzn1.ask.device.AMAZ5FPGYM43LH3SO7RAQX7UEJFN4Y5IWUVHSMZDNEKHBKUXYG3VOTJAHFHSH3ENLDNHZQINHBCTVYFBLCRWRZKKWASCBORGOILNEMF5WMZ4NTUBF5FW4FK7SFLVJ6G2GQ3TKHXUEPHKI7NYCZXZUY6L3DIZQ6UFJRUSNQVRITLLHSN2YH3QDZ36DM2UJ32NVPPQJH2ANYSFY363": "desk",
+    "amzn1.ask.device.AMA2NLYQJQFUCVD4HMIEXOBRYCOIHBPLIBH3QJ522I7S347GV5GBHTOEXHPOGIGXPUZDF6ZWBJQVOLZNMCWOISQNZ62ECRXBBQ62JHXBBMAJ7WTDXNFCBYEDWQHOBF6R5FYAXI3T6HCZWNCGCNKMM4SQ6CW7XSXAIYDERZ4ODUQJQUU4GNGM3MZWQ4VJ7LOYFQ3KUBVMF7ARZGL7": "santiago livingroom"
 }
 room_map = {'small': 'small', 'bedroom': 'small', 'big': 'big', 'livingroom': 'big', 'desk': 'big'}
 valid_devices = ['tv', 'tivo']
@@ -25,10 +26,10 @@ commands_map = {
         "mute": { "device": "tv", "command": "mute" },
         "pause": { "device": "tivo", "command": "pause" },
         "louder": {
-            "device": "tv", "command": "volume-up", "count": 3
+            "device": "tv", "command": "volume-up", "count": 5
         },
         "softer": {
-            "device": "tv", "command": "volume-down", "count": 3
+            "device": "tv", "command": "volume-down", "count": 5
         },
         "fire tv": {
             "device": "tv",
@@ -44,5 +45,15 @@ commands_map = {
         }
     }
 
+say_request_responses = {
+    "WhyAlfredIntent": {
+        "text": "In the movie \"The Demon Seed,\" the machine the protagonist speaks to at home is named Alfred. Alfred is the home computer system that becomes controlled by the artificial intelligence Proteus IV.",
+        "next_text": "Would you like to know more about Alfred?",
+        "next_intent": "WhyAlfredMoreIntent"
+    },
+    "WhyAlfredMoreIntent": {
+        "text": "At the end of the movie, Alfred impregnates the female protagonist with a demon seed. You don't want to hear more."
+    }
+}
 if __name__ == "__main__":
     intents = {}

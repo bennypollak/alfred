@@ -76,6 +76,7 @@ def process_request(session_attributes):
     action = session_attributes.get('action')
     if not action:
         return f"No action defined for {intent_name}"
+    count = session_attributes.get('count', 1)
     command_info = commands_map.get(action)
     device = command_info['device']
     device = device_names_map[device][room]
@@ -102,8 +103,9 @@ def process_request(session_attributes):
         commands = [command]
 
     slug = ''
-    for command in commands:
-        slug += f"{device}:{command},"
+    for _ in range(count):
+        for command in commands:
+            slug += f"{device}:{command},"
     slug = slug[:-1]
     url = f"https://yo372002.ngrok.io/hubs/harmony-hub/commandlist/{slug}"
     return send_request(url)

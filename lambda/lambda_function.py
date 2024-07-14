@@ -28,6 +28,7 @@ class LaunchRequestHandler(AbstractRequestHandler):
     def handle(self, handler_input):
         session_attributes = handler_input.attributes_manager.session_attributes
         debug = s3.get_config().get('debug', True)
+        session_attributes['debug'] = debug
         user_name = 'Benny'
         session_attributes['user_name'] = user_name
         session_attributes['intent_name'] = "LaunchRequest"
@@ -113,7 +114,7 @@ class ChannelIntentHandler(AbstractRequestHandler):
         return ask_utils.is_intent_name("ChannelIntent")(handler_input)
     def handle(self, handler_input):
         session_attributes = handler_input.attributes_manager.session_attributes
-        debug = session_attributes['debug']
+        debug = session_attributes.get('debug', True)
         session_attributes['intent_name'] = get_intent_name(handler_input)
         session_attributes['action'] = 'channel'
         channel_number, intended_channel_number = utils.slot_value(handler_input, 'channel_number')
@@ -187,6 +188,55 @@ def handle_request(handler_input, session_attributes):
             .set_card(SimpleCard(f"Alfred", output_text))
             .set_should_end_session(True).response)
 
+class JustSayIntentHandler(AbstractRequestHandler):
+    def can_handle(self, handler_input):
+        return is_intent_name("WhyAlfredIntent")(handler_input) or is_intent_name("WhyAlfredMoreIntent")(handler_input)
+    def handle(self, handler_input):
+        intent_request = handler_input.request_envelope.request
+        session_attributes = handler_input.attributes_manager.session_attributes
+        next_intent = session_attributes.get('next_intent')
+
+        intent_name = get_intent_name(handler_input)
+        say_request_response = configs.say_request_responses.get(intent_name)
+        speak_text = say_request_response.get('text', "I don't know")
+        speak_output = utils.alfred_voice(speak_text)
+        more_text = say_request_response.get('next_text')
+        next_intent = say_request_response.get('next_intent')
+        if not next_intent:
+            return (handler_input.response_builder.speak(speak_output)
+                    .set_card(SimpleCard(f"Alfred", speak_text))
+                    .set_should_end_session(True).response)
+        speak_text += f" {more_text}"
+        session_attributes['next_intent'] = next_intent
+
+        return (handler_input.response_builder.speak(speak_output)
+                .speak(speak_output)
+                .set_card(SimpleCard(f"Alfred", speak_text))
+                .add_directive(DelegateDirective(updated_intent=Intent(name="YesNoIntent")))
+                .response
+                )
+class YesNoIntentHandler(AbstractRequestHandler):
+    def can_handle(self, handler_input):
+        return ask_utils.is_intent_name("YesNoIntent")(handler_input)
+    def handle(self, handler_input):
+        session_attributes = handler_input.attributes_manager.session_attributes
+        next_intent = session_attributes['next_intent']
+        yes_no, intended_yes_no = utils.slot_value(handler_input, 'yes_no')
+
+        if yes_no == 'yes':
+            return (handler_input.response_builder
+                    .speak('')
+                    .add_directive(DelegateDirective(updated_intent=Intent(name=next_intent)))
+                    .response
+                    )
+        else:
+            speak_text = "Ok. Goodbye."
+            speak_output = utils.alfred_voice(speak_text)
+            return (handler_input.response_builder.speak(speak_output)
+                    .set_card(SimpleCard(f"Alfred", speak_text))
+                    .set_should_end_session(True).response)
+
+
 sb = SkillBuilder()
 sb.add_request_handler(LaunchRequestHandler())
 sb.add_request_handler(ScreenPowerIntentHandler())
@@ -195,6 +245,8 @@ sb.add_request_handler(ScreenActionIntentHandler())
 sb.add_request_handler(RoomIntentHandler())
 sb.add_request_handler(ChannelIntentHandler())
 sb.add_request_handler(NextStepIntentHandler())
+sb.add_request_handler(JustSayIntentHandler())
+sb.add_request_handler(YesNoIntentHandler())
 
 lambda_deprecated.add_request_handlers(sb, logger)
 # Must go at the end!
