@@ -76,10 +76,10 @@ def process_request(session_attributes):
     action = session_attributes.get('action')
     if not action:
         return f"No action defined for {intent_name}"
-    count = session_attributes.get('count', 1)
     command_info = commands_map.get(action)
     device = command_info['device']
     device = device_names_map[device][room]
+    count = command_info.get('count', 1)
     commands = []
     if intent_name == 'ScreenActionIntent':
         command = command_info['command']
@@ -108,7 +108,12 @@ def process_request(session_attributes):
             slug += f"{device}:{command},"
     slug = slug[:-1]
     url = f"https://yo372002.ngrok.io/hubs/harmony-hub/commandlist/{slug}"
-    return send_request(url)
+    response = send_request(url)
+    result = {
+        "response": response,
+        "url": url
+    }
+    return result
 
 def echo_device_name(handler_input):
     device_id = handler_input.request_envelope.context.system.device.device_id

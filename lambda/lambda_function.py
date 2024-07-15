@@ -177,15 +177,17 @@ class NextStepIntentHandler(AbstractRequestHandler):
 
 def handle_request(handler_input, session_attributes):
     room_name = session_attributes.get('original_room_name')
-    user_name = session_attributes.get('user_name')
+    debug = session_attributes.get('debug', True)
     intent_name = session_attributes.get('intent_name')
     intent_name = utils.camel_to_space(intent_name)
     send_result = utils.process_request(session_attributes)
-    output_text = f"I did {intent_name} for {room_name} and got {send_result}"
+    url = send_result.get('url')
+    response = send_result.get('response', 'unknown response')
+    output_text = f"I did {intent_name} for {room_name} and got {response}"
     speak_output = utils.alfred_voice(output_text)
-    print(output_text)
+    print(send_result)
     return (handler_input.response_builder.speak(speak_output)
-            .set_card(SimpleCard(f"Alfred", output_text))
+            .set_card(SimpleCard(f"Alfred", f"{output_text} for {url}"))
             .set_should_end_session(True).response)
 
 class JustSayIntentHandler(AbstractRequestHandler):
