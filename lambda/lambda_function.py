@@ -69,6 +69,7 @@ class ScreenPowerIntentHandler(AbstractRequestHandler):
         return ask_utils.is_intent_name("ScreenPowerIntent")(handler_input)
     def handle(self, handler_input):
         session_attributes = handler_input.attributes_manager.session_attributes
+        debug = session_attributes.get('debug', False)
         session_attributes['intent_name'] = get_intent_name(handler_input)
         session_attributes['action'] = 'tv-power'
         power, intended_power = utils.slot_value(handler_input, 'power', 'toggle')
@@ -80,7 +81,7 @@ class ScreenPowerIntentHandler(AbstractRequestHandler):
             room_name = intended_room_name = utils.room_echo_device_in(handler_input)
         if not room_name:
             device_name = utils.echo_device_name(handler_input)
-            speak_output = utils.alfred_voice(f"power for which room from {device_name}?")
+            speak_output = utils.alfred_voice(f"power for which room from {device_name}?" if debug else f"power for which room?")
             return (handler_input.response_builder.speak(speak_output)
                     .speak(speak_output)
                     .add_directive(DelegateDirective(updated_intent=Intent(name="RoomIntent")))
@@ -123,7 +124,7 @@ class ChannelIntentHandler(AbstractRequestHandler):
             room_name = intended_room_name = utils.room_echo_device_in(handler_input)
         if not room_name:
             device_name = utils.echo_device_name(handler_input)
-            speak_output = utils.alfred_voice(f"channel for which room from {device_name}?")
+            speak_output = utils.alfred_voice(f"channel for which room from {device_name}?" if debug else f"channel for which room?")
             return (handler_input.response_builder.speak(speak_output)
                     .speak(speak_output)
                     .add_directive(DelegateDirective(updated_intent=Intent(name="RoomIntent")))
@@ -139,7 +140,7 @@ class ScreenActionIntentHandler(AbstractRequestHandler):
     def handle(self, handler_input):
         session_attributes = handler_input.attributes_manager.session_attributes
         session_attributes['intent_name'] = get_intent_name(handler_input)
-        user_name = session_attributes['user_name']
+        debug = session_attributes.get('debug', False)
         action, intended_action = utils.slot_value(handler_input, 'action')
         session_attributes['action'] = action
         session_attributes['intended_action'] = intended_action
@@ -148,7 +149,7 @@ class ScreenActionIntentHandler(AbstractRequestHandler):
             room_name = intended_room_name = utils.room_echo_device_in(handler_input)
         if not room_name:
             device_name = utils.echo_device_name(handler_input)
-            speak_output = utils.alfred_voice(f"action for which room from {device_name}?")
+            speak_output = utils.alfred_voice(f"{intended_action} for which room from {device_name}?" if debug else f"{intended_action} for which room?")
             return (handler_input.response_builder.speak(speak_output)
                     .speak(speak_output)
                     .add_directive(DelegateDirective(updated_intent=Intent(name="RoomIntent")))
@@ -158,20 +159,9 @@ class ScreenActionIntentHandler(AbstractRequestHandler):
         session_attributes['intended_room_name'] = intended_room_name
         return handle_request(handler_input, session_attributes)
 
-class NextStepIntentHandler(AbstractRequestHandler):
-    def can_handle(self, handler_input):
-        return is_intent_name("NextStepIntent")(handler_input)
-    def handle(self, handler_input):
-        session_attributes = handler_input.attributes_manager.session_attributes
-        original_room_name = session_attributes.get('original_room_name', 'unknown original room')
-        intended_room_name = session_attributes.get('intended_room_name', 'unknown processed room')
-        speak_output = utils.alfred_voice(f"I will take care of {original_room_name} as {intended_room_name}")
-        return handler_input.response_builder.speak(speak_output).set_should_end_session(True).response
-
-
 def handle_request(handler_input, session_attributes):
     room_name = session_attributes.get('original_room_name')
-    debug = session_attributes.get('debug', True)
+    debug = session_attributes.get('debug', False)
     intent_name = session_attributes.get('intent_name')
     intent_name = utils.camel_to_space(intent_name)
     send_result = utils.process_request(session_attributes)
@@ -187,11 +177,10 @@ def handle_request(handler_input, session_attributes):
 class JustSayIntentHandler(AbstractRequestHandler):
     def can_handle(self, handler_input):
         intent_name = get_intent_name(handler_input)
-        print(f"JustSayIntentHandler Intent Name: {intent_name}")
         return intent_name.startswith("JustSay")
-        # return is_intent_name("WhyAlfredIntent")(handler_input) or is_intent_name("WhyAlfredMoreIntent")(handler_input) or is_intent_name("MorningRoutineIntent")(handler_input)
     def handle(self, handler_input):
-        intent_request = handler_input.request_envelope.request
+        session_attributes = handler_input.attributes_manager.session_attributes
+        debug = session_attributes.get('debug', False)
         session_attributes = handler_input.attributes_manager.session_attributes
         next_intent = session_attributes.get('next_intent')
 
@@ -221,15 +210,13 @@ class YesNoIntentHandler(AbstractRequestHandler):
         session_attributes = handler_input.attributes_manager.session_attributes
         next_intent = session_attributes['next_intent']
         yes_no, intended_yes_no = utils.slot_value(handler_input, 'yes_no')
-
         if yes_no == 'yes':
-            return (handler_input.response_builder
-                    .speak('')
+            return (handler_input.response_builder.speak('')
                     .add_directive(DelegateDirective(updated_intent=Intent(name=next_intent)))
                     .response
                     )
         else:
-            speak_text = "Ok. Goodbye."
+            speak_text = "Ok."
             speak_output = utils.alfred_voice(speak_text)
             return (handler_input.response_builder.speak(speak_output)
                     .set_card(SimpleCard(f"Alfred", speak_text))
@@ -243,7 +230,6 @@ sb.add_request_handler(SetConfigIntentHandler())
 sb.add_request_handler(ScreenActionIntentHandler())
 sb.add_request_handler(RoomIntentHandler())
 sb.add_request_handler(ChannelIntentHandler())
-sb.add_request_handler(NextStepIntentHandler())
 sb.add_request_handler(JustSayIntentHandler())
 sb.add_request_handler(YesNoIntentHandler())
 

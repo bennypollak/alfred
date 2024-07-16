@@ -171,9 +171,7 @@
                         }
                     ],
                     "samples": [
-                        "set {config_item} {on_off}",
-                        "turn {config_item} {on_off}",
-                        "turn {on_off} {config_item}"
+                        "set {config_item} {on_off}"
                     ]
                 },
                 {
@@ -447,7 +445,11 @@
                         },
                         {
                             "name": {
-                                "value": "debug"
+                                "value": "debug",
+                                "synonyms": [
+                                    "the bug",
+                                    "the bag"
+                                ]
                             }
                         }
                     ]
