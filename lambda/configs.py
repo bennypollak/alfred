@@ -46,13 +46,19 @@ commands_map = {
     }
 
 say_request_responses = {
-    "WhyAlfredIntent": {
+    "JustSayWhyAlfredIntent": {
         "text": "In the movie \"The Demon Seed,\" the machine the protagonist speaks to at home is named Alfred. Alfred is the home computer system that becomes controlled by the artificial intelligence Proteus IV.",
         "next_text": "Would you like to know more about Alfred?",
-        "next_intent": "WhyAlfredMoreIntent"
+        "next_intent": "JustSayWhyAlfredMoreIntent"
     },
-    "WhyAlfredMoreIntent": {
+    "JustSayWhyAlfredMoreIntent": {
         "text": "At the end of the movie, Alfred impregnates the female protagonist with a demon seed. You don't want to hear more."
+    },
+    "JustSayMorningRoutineIntent": {
+        "text": "Ok Google,,, Set alarm for 30 minutes and play WNYC"
+    },
+    "JustSayTestIntent": {
+        "text": "Just testing"
     }
 }
 if __name__ == "__main__":

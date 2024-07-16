@@ -1,0 +1,40 @@
+{room} channel {channel_number}
+{room} to {channel_number}
+{room} {channel_number}
+{room} {station}
+set {room} to {channel_number}
+{channel_number} in {room}
+tune in to {channel_number}
+set channel {room} to {channel_number}
+channel {channel_number}
+channel {channel_number} in {room}
+channel {channel_number} on {room}
+watch channel {channel_number}
+watch channel {channel_number} in {room}
+watch channel {channel_number} on {room}
+{room} to {station}
+set {room} to {station}
+tune in to {station}
+set channel {room} to {station}
+{station}
+{station} in {room}
+{station} on {room}
+watch {station}
+watch {station} in {room}
+watch {station} on {room}
+
+
+{room} {action}
+{room} tv {action}
+{action} {room}
+{action} {room} tv
+{action} tv {room}
+{action} in {room}
+{action}
+set tv to {action}
+set tv to {action} in {room}
+
+{config_item} {on_off}
+set {config_item} {on_off}
+turn {config_item} {on_off}
+turn {on_off} {config_item}

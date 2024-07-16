@@ -51,13 +51,14 @@ class SetConfigIntentHandler(AbstractRequestHandler):
     def can_handle(self, handler_input):
         return is_intent_name("SetConfigIntent")(handler_input)
     def handle(self, handler_input):
-        intent_request = handler_input.request_envelope.request
         session_attributes = handler_input.attributes_manager.session_attributes
-        original_debug, intended_debug = utils.slot_value(handler_input, 'on_off')
+        debug = session_attributes.get('debug', 'on')
+        original_on_off, intended_on_off = utils.slot_value(handler_input, 'on_off', 'on')
+        original_config_item, intended_config_item = utils.slot_value(handler_input, 'config_item')
         config = s3.get_config()
-        config['debug'] = True if intended_debug == 'on' else False
+        config[intended_config_item] = True if intended_on_off == 'on' else False
         s3.write_config(config)
-        speak_text = f"setting intended_debug {intended_debug} original_debug: {original_debug}"
+        speak_text = f"setting {original_config_item}, {intended_config_item} to: {intended_on_off}" if debug else f"setting {intended_config_item} to: {intended_on_off}"
         speak_output = utils.alfred_voice(speak_text)
         return (handler_input.response_builder.speak(speak_output)
             .set_card(SimpleCard(f"Alfred", speak_text))
@@ -85,13 +86,6 @@ class ScreenPowerIntentHandler(AbstractRequestHandler):
                     .add_directive(DelegateDirective(updated_intent=Intent(name="RoomIntent")))
                     .response
                     )
-        # output_text = f"Power: {power}, Intended Power: {intended_power}, Room Name: {room_name}, Intended Room Name: {intended_room_name}"
-        # speak_output = utils.alfred_voice(output_text)
-        # print(output_text)
-        # return (handler_input.response_builder.speak(speak_output)
-        #         .set_card(SimpleCard(f"Alfred", f"Power: {power}, Intended Power: {intended_power}"))
-        #         .set_should_end_session(False).response)
-        # print(f"Room Name: {room_name}, Intended Room Name: {intended_room_name}")
         session_attributes['original_room_name'] = room_name
         session_attributes['intended_room_name'] = intended_room_name
         return handle_request(handler_input, session_attributes)
@@ -183,7 +177,7 @@ def handle_request(handler_input, session_attributes):
     send_result = utils.process_request(session_attributes)
     url = send_result.get('url')
     response = send_result.get('response', 'unknown response')
-    output_text = f"I did {intent_name} for {room_name} and got {response}"
+    output_text = f"I did {intent_name} for {room_name} and got {response}" if debug else f" {intent_name} for {room_name} with {response}."
     speak_output = utils.alfred_voice(output_text)
     print(send_result)
     return (handler_input.response_builder.speak(speak_output)
@@ -192,7 +186,10 @@ def handle_request(handler_input, session_attributes):
 
 class JustSayIntentHandler(AbstractRequestHandler):
     def can_handle(self, handler_input):
-        return is_intent_name("WhyAlfredIntent")(handler_input) or is_intent_name("WhyAlfredMoreIntent")(handler_input)
+        intent_name = get_intent_name(handler_input)
+        print(f"JustSayIntentHandler Intent Name: {intent_name}")
+        return intent_name.startswith("JustSay")
+        # return is_intent_name("WhyAlfredIntent")(handler_input) or is_intent_name("WhyAlfredMoreIntent")(handler_input) or is_intent_name("MorningRoutineIntent")(handler_input)
     def handle(self, handler_input):
         intent_request = handler_input.request_envelope.request
         session_attributes = handler_input.attributes_manager.session_attributes

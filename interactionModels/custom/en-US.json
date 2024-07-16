@@ -148,9 +148,14 @@
                     ],
                     "samples": [
                         "{room} {action}",
+                        "{room} tv {action}",
                         "{action} {room}",
+                        "{action} {room} tv",
+                        "{action} tv {room}",
                         "{action} in {room}",
-                        "{action}"
+                        "{action}",
+                        "set tv to {action}",
+                        "set tv to {action} in {room}"
                     ]
                 },
                 {
@@ -159,15 +164,20 @@
                         {
                             "name": "on_off",
                             "type": "OnOff"
+                        },
+                        {
+                            "name": "config_item",
+                            "type": "ConfigType"
                         }
                     ],
                     "samples": [
-                        "debug {on_off}",
-                        "set debug {on_off}"
+                        "set {config_item} {on_off}",
+                        "turn {config_item} {on_off}",
+                        "turn {on_off} {config_item}"
                     ]
                 },
                 {
-                    "name": "WhyAlfredIntent",
+                    "name": "JustSayWhyAlfredIntent",
                     "slots": [],
                     "samples": [
                         "Who the hell is Alfred",
@@ -189,6 +199,21 @@
                         }
                     ],
                     "samples": []
+                },
+                {
+                    "name": "JustSayMorningRoutineIntent",
+                    "slots": [],
+                    "samples": [
+                        "Good morning Google"
+                    ]
+                },
+                {
+                    "name": "JustSayTestIntent",
+                    "slots": [],
+                    "samples": [
+                        "Testing",
+                        "Just testing"
+                    ]
                 }
             ],
             "types": [
@@ -199,6 +224,7 @@
                             "name": {
                                 "value": "small",
                                 "synonyms": [
+                                    "benny's room",
                                     "bedroom"
                                 ]
                             }
@@ -320,17 +346,43 @@
                     "values": [
                         {
                             "name": {
+                                "value": "softer",
+                                "synonyms": [
+                                    "quieter",
+                                    "lower volume",
+                                    "volume down"
+                                ]
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "louder",
+                                "synonyms": [
+                                    "noisier",
+                                    "higher volume",
+                                    "volume up"
+                                ]
+                            }
+                        },
+                        {
+                            "name": {
                                 "value": "roku"
                             }
                         },
                         {
                             "name": {
-                                "value": "cable"
+                                "value": "cable",
+                                "synonyms": [
+                                    "tivo"
+                                ]
                             }
                         },
                         {
                             "name": {
-                                "value": "fire tv"
+                                "value": "fire tv",
+                                "synonyms": [
+                                    "fire"
+                                ]
                             }
                         },
                         {
@@ -377,6 +429,25 @@
                                 "synonyms": [
                                     "yep"
                                 ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "ConfigType",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "follow up",
+                                "synonyms": [
+                                    "more",
+                                    "continue"
+                                ]
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "debug"
                             }
                         }
                     ]
@@ -510,10 +581,15 @@
                             "name": "on_off",
                             "type": "OnOff",
                             "confirmationRequired": false,
-                            "elicitationRequired": true,
-                            "prompts": {
-                                "elicitation": "Elicit.Slot.996785815069.1288032450560"
-                            }
+                            "elicitationRequired": false,
+                            "prompts": {}
+                        },
+                        {
+                            "name": "config_item",
+                            "type": "ConfigType",
+                            "confirmationRequired": false,
+                            "elicitationRequired": false,
+                            "prompts": {}
                         }
                     ]
                 },
