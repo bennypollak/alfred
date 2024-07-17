@@ -44,7 +44,19 @@ commands_map = {
             }
         }
     }
+ac_actions = {
+  "one_off": "thermo/one/0",
+  "one_cycle_off": "cycle/one/0",
+  "one_set": "thermo/set/one",
+  "one_warmer": "thermo/one/0.4",
+  "one_colder": "thermo/one/-0.3",
 
+  "two_off": "wemo/thermo/two/0",
+  "two_cycle_off": "wemo/cycle/two/0",
+  "two_set": "wemo/set/two",
+  "two_warmer": "wemo/thermo/two/0.6",
+  "two_colder": "wemo/thermo/two/-0.3"
+}
 say_request_responses = {
     "JustSayWhyAlfredIntent": {
         "text": "In the movie \"The Demon Seed,\" the machine the protagonist speaks to at home is named Alfred. Alfred is the home computer system that becomes controlled by the artificial intelligence Proteus IV.",

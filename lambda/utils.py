@@ -73,41 +73,57 @@ def room_echo_device_in(handler_input):
 def process_request(session_attributes):
     intent_name = session_attributes.get('intent_name')
     room = session_attributes.get('intended_room_name')
-    action = session_attributes.get('action')
-    if not action:
-        return f"No action defined for {intent_name}"
-    command_info = commands_map.get(action)
-    device = command_info['device']
-    device = device_names_map[device][room]
-    count = command_info.get('count', 1)
-    commands = []
-    if intent_name == 'ScreenActionIntent':
-        command = command_info['command']
-        print(f"Action: {action}, Command: {command}")
-        if command and isinstance(command, dict):
-            command = command.get(room)
-            print(f"Command: {command}")
-        if not command:
-            return f"No command found for {action} in {room}"
-        commands = [command]
-    elif intent_name == 'ChannelIntent':
-        channel = session_attributes.get('channel_number')
-        station = session_attributes.get('intended_station')
-        if station:
-            channel = station_to_channel_map.get(station)
-        if channel is None:
-            return f"No station for {room}"
-        commands = list(str(channel))
+    path = ''
+    if intent_name == 'AirIntent':
+        on_off = session_attributes.get('on_off')
+        temp = session_attributes.get('temp')
+        room_number = 'one' if room == 'small' else 'two'
+        print(f"Room: {room}, Room Number: {room_number} Temp: {temp} On/Off: {on_off}")
+        if temp:
+            if temp == 'current':
+                path = f"wemo/thermo/set/{room_number}"
+            else:
+                value = 0.4 if temp == 'hotter' else -0.3
+                path = f"wemo/thermo/{room_number}/{value}"
+        else:
+            path = f"wemo/thermo/{room_number}" if on_off == 'on' else f"wemo/cycle/{room_number}/0"
     else:
-        command = command_info.get('command')
-        commands = [command]
+        action = session_attributes.get('action')
+        if not action:
+            return f"No action defined for {intent_name}"
+        command_info = commands_map.get(action)
+        device = command_info['device']
+        device = device_names_map[device][room]
+        count = command_info.get('count', 1)
+        commands = []
+        if intent_name == 'ScreenActionIntent':
+            command = command_info['command']
+            print(f"Action: {action}, Command: {command}")
+            if command and isinstance(command, dict):
+                command = command.get(room)
+                print(f"Command: {command}")
+            if not command:
+                return f"No command found for {action} in {room}"
+            commands = [command]
+        elif intent_name == 'ChannelIntent':
+            channel = session_attributes.get('channel_number')
+            station = session_attributes.get('intended_station')
+            if station:
+                channel = station_to_channel_map.get(station)
+            if channel is None:
+                return f"No station for {room}"
+            commands = list(str(channel))
+        else:
+            command = command_info.get('command')
+            commands = [command]
 
-    slug = ''
-    for _ in range(count):
-        for command in commands:
-            slug += f"{device}:{command},"
-    slug = slug[:-1]
-    url = f"https://yo372002.ngrok.io/hubs/harmony-hub/commandlist/{slug}"
+        slug = ''
+        for _ in range(count):
+            for command in commands:
+                slug += f"{device}:{command},"
+        slug = slug[:-1]
+        path = f"hubs/harmony-hub/commandlist/{slug}"
+    url = f"https://yo372002.ngrok.io/{path}"
     response = send_request(url)
     result = {
         "response": response,

@@ -134,6 +134,33 @@ class ChannelIntentHandler(AbstractRequestHandler):
         session_attributes['intended_room_name'] = intended_room_name
         return handle_request(handler_input, session_attributes)
 
+class AirIntentHandler(AbstractRequestHandler):
+    def can_handle(self, handler_input):
+        return ask_utils.is_intent_name("AirIntent")(handler_input)
+    def handle(self, handler_input):
+        session_attributes = handler_input.attributes_manager.session_attributes
+        debug = session_attributes.get('debug', True)
+        session_attributes['intent_name'] = get_intent_name(handler_input)
+
+        original_on_off, intended_on_off = utils.slot_value(handler_input, 'on_off', 'on')
+        session_attributes['on_off'] = intended_on_off
+        original_temp, intended_temp = utils.slot_value(handler_input, 'temp')
+        session_attributes['temp'] = intended_temp
+        room_name, intended_room_name = utils.slot_value(handler_input, 'room')
+        if not room_name:
+            room_name = intended_room_name = utils.room_echo_device_in(handler_input)
+        if not room_name:
+            device_name = utils.echo_device_name(handler_input)
+            speak_output = utils.alfred_voice(f"air for which room from {device_name}?" if debug else f"air for which room?")
+            return (handler_input.response_builder.speak(speak_output)
+                    .speak(speak_output)
+                    .add_directive(DelegateDirective(updated_intent=Intent(name="RoomIntent")))
+                    .response
+                    )
+        session_attributes['original_room_name'] = room_name
+        session_attributes['intended_room_name'] = intended_room_name
+        return handle_request(handler_input, session_attributes)
+
 class ScreenActionIntentHandler(AbstractRequestHandler):
     def can_handle(self, handler_input):
         return ask_utils.is_intent_name("ScreenActionIntent")(handler_input)
@@ -163,21 +190,25 @@ def handle_request(handler_input, session_attributes):
     room_name = session_attributes.get('original_room_name')
     debug = session_attributes.get('debug', False)
     intent_name = session_attributes.get('intent_name')
-    intent_name = utils.camel_to_space(intent_name)
+    intent_name_text = utils.camel_to_space(intent_name)
+    print(f"handling Intent Name: {intent_name}, Room Name: {room_name}")
     send_result = utils.process_request(session_attributes)
     url = send_result.get('url')
     response = send_result.get('response', 'unknown response')
-    output_text = f"I did {intent_name} for {room_name} and got {response}" if debug else f" {intent_name} for {room_name} with {response}."
-    speak_output = utils.alfred_voice(output_text)
+    output_text = f"I did {intent_name_text} for {room_name} and got {response}" if debug else f" {intent_name_text} for {room_name} with {response}."
     print(send_result)
+    speak_output = utils.alfred_voice(output_text)
     return (handler_input.response_builder.speak(speak_output)
             .set_card(SimpleCard(f"Alfred", f"{output_text} for {url}"))
             .set_should_end_session(True).response)
 
 class JustSayIntentHandler(AbstractRequestHandler):
     def can_handle(self, handler_input):
-        intent_name = get_intent_name(handler_input)
-        return intent_name.startswith("JustSay")
+        try:
+            intent_name = get_intent_name(handler_input)
+            return intent_name.startswith("JustSay")
+        except:
+            return False
     def handle(self, handler_input):
         session_attributes = handler_input.attributes_manager.session_attributes
         debug = session_attributes.get('debug', False)
@@ -203,6 +234,7 @@ class JustSayIntentHandler(AbstractRequestHandler):
                 .add_directive(DelegateDirective(updated_intent=Intent(name="YesNoIntent")))
                 .response
                 )
+
 class YesNoIntentHandler(AbstractRequestHandler):
     def can_handle(self, handler_input):
         return ask_utils.is_intent_name("YesNoIntent")(handler_input)
@@ -232,6 +264,7 @@ sb.add_request_handler(RoomIntentHandler())
 sb.add_request_handler(ChannelIntentHandler())
 sb.add_request_handler(JustSayIntentHandler())
 sb.add_request_handler(YesNoIntentHandler())
+sb.add_request_handler(AirIntentHandler())
 
 lambda_deprecated.add_request_handlers(sb, logger)
 # Must go at the end!
