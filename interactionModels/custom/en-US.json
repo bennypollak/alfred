@@ -212,6 +212,73 @@
                         "Testing",
                         "Just testing"
                     ]
+                },
+                {
+                    "name": "AirIntent",
+                    "slots": [
+                        {
+                            "name": "room",
+                            "type": "RoomType"
+                        },
+                        {
+                            "name": "temp",
+                            "type": "TempType"
+                        },
+                        {
+                            "name": "on_off",
+                            "type": "OnOff"
+                        }
+                    ],
+                    "samples": [
+                        "{room} heater {on_off}",
+                        "turn {on_off} the heater",
+                        "turn {on_off} the heater in {room}",
+                        "turn heater {on_off} in {room}",
+                        "turn heater {on_off}",
+                        "turn the heater {on_off} in {room}",
+                        "turn the heater {on_off}",
+                        "turn {room} heater {on_off}",
+                        "heater {on_off} in {room}",
+                        "heater {on_off} the {room}",
+                        "heater {on_off}",
+                        "{room} ac {on_off}",
+                        "turn {on_off} the ac",
+                        "turn {on_off} the ac in {room}",
+                        "turn {on_off} the {room} ac",
+                        "turn {on_off} {room} ac",
+                        "turn {on_off} {room} air conditioner",
+                        "turn {on_off} {room} heater",
+                        "turn ac {on_off} in {room}",
+                        "turn ac {on_off}",
+                        "turn the ac {on_off} in {room}",
+                        "turn the ac {on_off}",
+                        "turn {room} ac {on_off}",
+                        "ac in {room}",
+                        "a.c. in the {room}",
+                        "ac in the {room}",
+                        "ac {on_off} in {room}",
+                        "ac {on_off} the {room}",
+                        "ac {on_off}",
+                        "{room} air conditioner {on_off}",
+                        "turn {on_off} the air conditioner",
+                        "turn {on_off} the air conditioner in {room}",
+                        "turn air conditioner {on_off} in {room}",
+                        "turn air conditioner {on_off}",
+                        "turn the air conditioner {on_off} in {room}",
+                        "turn the air conditioner {on_off}",
+                        "turn {room} air conditioner {on_off}",
+                        "air conditioner {on_off} in {room}",
+                        "air conditioner {on_off} the {room}",
+                        "air conditioner {on_off}",
+                        "set {room} {temp}",
+                        "set {temp} in {room}",
+                        "turn {room} {temp}",
+                        "turn {temp} in {room}",
+                        "{temp} in {room}",
+                        "{temp}",
+                        "{room} more {temp}",
+                        "{room} {temp}"
+                    ]
                 }
             ],
             "types": [
@@ -449,6 +516,37 @@
                                 "synonyms": [
                                     "the bug",
                                     "the bag"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "TempType",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "current",
+                                "synonyms": [
+                                    "equal"
+                                ]
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "colder",
+                                "synonyms": [
+                                    "more cold"
+                                ]
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "hotter",
+                                "synonyms": [
+                                    "more warm",
+                                    "more hot",
+                                    "warmer"
                                 ]
                             }
                         }
