@@ -16,7 +16,6 @@ from ask_sdk_model import Response, Intent
 from ask_sdk_model.dialog import DelegateDirective
 from ask_sdk_model.interfaces.alexa.presentation.apl import (
     RenderDocumentDirective, ExecuteCommandsDirective, SpeakItemCommand)
-from ask_sdk_model.ui import SimpleCard
 
 logger = logging.getLogger(__name__)
 import utils
