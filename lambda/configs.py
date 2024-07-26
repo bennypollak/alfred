@@ -44,6 +44,7 @@ commands_map = {
             }
         }
     }
+
 ac_actions = {
   "one_off": "thermo/one/0",
   "one_cycle_off": "cycle/one/0",

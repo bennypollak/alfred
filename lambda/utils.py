@@ -149,4 +149,3 @@ def camel_to_space(input_string):
         else:
             result += char
     return result.lstrip()
-
