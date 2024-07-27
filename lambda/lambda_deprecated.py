@@ -16,6 +16,8 @@ from ask_sdk_model import Response, Intent
 from ask_sdk_model.dialog import DelegateDirective
 from ask_sdk_model.interfaces.alexa.presentation.apl import (
     RenderDocumentDirective, ExecuteCommandsDirective, SpeakItemCommand)
+from ask_sdk_model.ui import SimpleCard
+from ask_sdk_model.interfaces.alexa.presentation.apl import RenderDocumentDirective
 
 logger = logging.getLogger(__name__)
 import utils
@@ -24,6 +26,34 @@ class TestIntentHandler(AbstractRequestHandler):
     def can_handle(self, handler_input):
         return is_intent_name("TestIntent")(handler_input)
     def handle(self, handler_input):
+        movie_name = "laWRENCE of arabia" #handler_input.request_envelope.request.intent.slots["movie_name"].value
+        speak_output = f"Playing {movie_name} on Fire TV."
+
+        # Fire TV directive to play the movie (using RenderDocumentDirective)
+        document = {
+            # ... (APL document structure)
+            "mainTemplate": {
+                "items": [
+                    {
+                        "type": "FireTvVideo",
+                        "source": f"https://www.amazon.com/dp/{movie_name}", # Replace with your video source
+                        "autoplay": True,
+                    }
+                ]
+            }
+        }
+
+        return (
+            handler_input.response_builder
+            .speak(speak_output)
+            .add_directive(
+                RenderDocumentDirective(
+                    token="videoPlayerToken",
+                    document=document,
+                )
+            )
+            .response
+        )
         intent_request = handler_input.request_envelope.request
         session_attributes = handler_input.attributes_manager.session_attributes
         print("Intent Request Object: " + json.dumps(utils.to_dict(intent_request)))

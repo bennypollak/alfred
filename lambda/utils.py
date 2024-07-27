@@ -3,7 +3,7 @@ import json
 from datetime import datetime
 import requests
 from configs import echo_device_map, room_map, valid_devices, station_to_channel_map, \
-    device_names_map, commands_map
+    device_names_map, commands_map, device_types
 
 def to_dict(obj):
     if isinstance(obj, list):
@@ -31,6 +31,11 @@ def female_voice(text):
 def alfred_voice(text):
     return get_ssml_response(text, 'Matthew')
 
+def get_query_utterance(handler_input):
+    slots = handler_input.request_envelope.request.intent.slots
+    query = slots['query'].value if 'query' in slots and slots['query'].value else None
+    return query
+
 def slot_value(handler_input, name, default=None):
     intent_request = handler_input.request_envelope.request
     slots = intent_request.intent.slots
@@ -38,7 +43,7 @@ def slot_value(handler_input, name, default=None):
     resolved_value = default
     # name = name.lower()
     print(f"Slot name: {name}")
-    if name in slots:
+    if slots and name in slots:
         value = slots[name].value #.lower
         value = str(value).lower() if value else default
         resolved_value = value
@@ -56,9 +61,10 @@ def send_request(url, payload={}, headers={}):
         print(f"Sending request to {url}")
         response = requests.post(url, json=payload, headers=headers)
         if response.status_code == 200:
-            data = response.json()
+            #
+            data = response.text
             print(f"Got result: {data}")
-            return f'Success.'
+            return f'Ok'
         else:
             print("Failed to fetch data. Status code: {response.status_code}")
             return f'Failed.'
@@ -74,7 +80,15 @@ def process_request(session_attributes):
     intent_name = session_attributes.get('intent_name')
     room = session_attributes.get('intended_room_name')
     path = ''
-    if intent_name == 'AirIntent':
+    url = None
+    if intent_name == 'DeviceIntent':
+        intended_on_off = session_attributes.get('intended_on_off')
+        intended_device = session_attributes.get('intended_device')
+        device_type = device_types.get(intended_device, 'unknown')['type']
+        intended_device = intended_device.lower().replace(' ', '%20')
+        print(f"Device: {intended_device} On/Off: {intended_on_off}")
+        path = f"devices/{device_type}:{intended_device}:{intended_on_off}"
+    elif intent_name == 'AirIntent':
         on_off = session_attributes.get('on_off')
         temp = session_attributes.get('temp')
         room_number = 'one' if room == 'small' else 'two'
@@ -88,42 +102,59 @@ def process_request(session_attributes):
         else:
             path = f"wemo/thermo/{room_number}" if on_off == 'on' else f"wemo/cycle/{room_number}/0"
     else:
-        action = session_attributes.get('action')
+        times = int(session_attributes.get('intended_times', 1))
+        action = session_attributes.get('intended_action')
         if not action:
             return f"No action defined for {intent_name}"
-        command_info = commands_map.get(action)
-        device = command_info['device']
-        device = device_names_map[device][room]
-        count = command_info.get('count', 1)
-        commands = []
-        if intent_name == 'ScreenActionIntent':
-            command = command_info['command']
-            print(f"Action: {action}, Command: {command}")
-            if command and isinstance(command, dict):
-                command = command.get(room)
-                print(f"Command: {command}")
-            if not command:
-                return f"No command found for {action} in {room}"
-            commands = [command]
-        elif intent_name == 'ChannelIntent':
+        commands = commands_map.get(action)
+        if intent_name == 'ChannelIntent':
             channel = session_attributes.get('channel_number')
             station = session_attributes.get('intended_station')
             if station:
                 channel = station_to_channel_map.get(station)
             if channel is None:
-                return f"No station for {room}"
-            commands = list(str(channel))
+                return {
+                    "response": f"No station for {room}",
+                    "url": ''
+                }
+            commands = []
+            for channel in list(str(channel)):
+                commands.append( { "device": "tivo", "command": channel, "count": 1 } )
         else:
-            command = command_info.get('command')
-            commands = [command]
-
-        slug = ''
-        for _ in range(count):
-            for command in commands:
-                slug += f"{device}:{command},"
-        slug = slug[:-1]
-        path = f"hubs/harmony-hub/commandlist/{slug}"
-    url = f"https://yo372002.ngrok.io/{path}"
+            if not isinstance(commands, list) and commands['device'] == 'url':
+                url = commands.get('command').get(room)
+            else:
+                if not isinstance(commands, list):
+                    commands = [ commands ]
+                print(f"Commands: {commands}")
+                for i in range(len(commands)):
+                    command = commands[i]
+                    if not 'command' in command:
+                        command['command'] = action
+                    command_action = command.get('command')
+                    if command_action and isinstance(command_action, dict):
+                        print(f"Command_action0: {command_action}")
+                        command = command.copy()
+                        command['command'] = command_action.get(room)
+                        commands[i] = command
+                        print(f"Command: {commands[i]}")
+                # if not command:
+                #     return f"No command found for {action} in {room}"
+        if not url:
+            slug = ''
+            for _ in range(times):
+                for command in commands:
+                    count = command.get('count', 1)
+                    for _ in range(count):
+                        device = device_names_map[command['device']][room]
+                        print(f"Command: {command}, Device: {device}")
+                        slug += f"{device}:{command['command']},"
+                        print(f"Slug: {slug}")
+            slug = slug[:-1]
+            path = f"hubs/harmony-hub/commandlist/{slug}"
+    if not url:
+        url = f"https://yo372002.ngrok.io/{path}"
+    print(f"URL: {url}")
     response = send_request(url)
     result = {
         "response": response,
@@ -141,11 +172,15 @@ def dump_request(handler_input):
     print("Intent Request Object: " + json.dumps(to_dict(intent_request)))
     print("Session Attributes: " + json.dumps(session_attributes))
 
-def camel_to_space(input_string):
+def camel_to_space(input_string, trim_last=False):
     result = ""
     for char in input_string:
         if char.isupper():
             result += " " + char.lower()
         else:
             result += char
-    return result.lstrip()
+    result = result.lstrip()
+    if trim_last:
+        result = result.split(' ')[:-1]
+        result = ' '.join(result)
+    return result

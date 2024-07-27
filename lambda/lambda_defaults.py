@@ -30,7 +30,7 @@ class CancelOrStopIntentHandler(AbstractRequestHandler):
                 ask_utils.is_intent_name("AMAZON.StopIntent")(handler_input))
     def handle(self, handler_input):
         speak_output = utils.alfred_voice("Goodbye!")
-        return handler_input.response_builder.speak(speak_output).response
+        return handler_input.response_builder.speak(speak_output).set_should_end_session(True).response
 
 class FallbackIntentHandler(AbstractRequestHandler):
     def can_handle(self, handler_input):
