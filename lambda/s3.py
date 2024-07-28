@@ -27,14 +27,6 @@ def s3_write(content, bucket=bucket_name, key=file_key, append=True, newline=Tru
                 raise
     s3_client.put_object(Bucket=bucket, Key=key, Body=content.encode('utf-8'))
 
-# def s3_read_yaml(bucket, key):
-#     content = s3_read(bucket, key)
-#     return yaml.safe_load(content)
-#
-# def s3_write_yaml(content, bucket=bucket_name, key=file_key):
-#     content = yaml.dump(content)
-#     s3_write(content, bucket, key)
-
 def get_config():
     try:
         config = json.loads(s3_read(bucket_name, 'config.json'))

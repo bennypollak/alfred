@@ -138,8 +138,6 @@ def process_request(session_attributes):
                         command['command'] = command_action.get(room)
                         commands[i] = command
                         print(f"Command: {commands[i]}")
-                # if not command:
-                #     return f"No command found for {action} in {room}"
         if not url:
             slug = ''
             for _ in range(times):

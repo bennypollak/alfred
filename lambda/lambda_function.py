@@ -112,6 +112,18 @@ class ChannelIntentHandler(AbstractRequestHandler):
         session_attributes['intended_station'] = intended_station
         return handle_room(handler_input, session_attributes, 'channel')
 
+class BlindsIntentHandler(AbstractRequestHandler):
+    def can_handle(self, handler_input):
+        return ask_utils.is_intent_name("BlindsIntent")(handler_input)
+    def handle(self, handler_input):
+        session_attributes = handler_input.attributes_manager.session_attributes
+        session_attributes['intent_name'] = intent_name = get_intent_name(handler_input)
+        blinds_type, intended_blinds_type = utils.slot_value(handler_input, 'blinds_type')
+        print(f"Intent Name: {intent_name} Blinds: {intended_blinds_type}")
+        session_attributes['action'] = blinds_type
+        session_attributes['intended_action'] = intended_blinds_type
+        return handle_room(handler_input, session_attributes, 'blinds')
+
 class AirIntentHandler(AbstractRequestHandler):
     def can_handle(self, handler_input):
         return ask_utils.is_intent_name("AirIntent")(handler_input)
@@ -119,7 +131,6 @@ class AirIntentHandler(AbstractRequestHandler):
         session_attributes = handler_input.attributes_manager.session_attributes
         debug = session_attributes.get('debug', True)
         session_attributes['intent_name'] = get_intent_name(handler_input)
-
         original_on_off, intended_on_off = utils.slot_value(handler_input, 'on_off', 'on')
         session_attributes['on_off'] = intended_on_off
         original_temp, intended_temp = utils.slot_value(handler_input, 'temp')
@@ -250,7 +261,6 @@ def handle_room(handler_input, session_attributes, intended_action):
     session_attributes['intended_room_name'] = intended_room_name
     return handle_request(handler_input, session_attributes)
 
-
 def handle_request(handler_input, session_attributes):
     session_attributes = handler_input.attributes_manager.session_attributes
     room_name = session_attributes.get('original_room_name')
@@ -290,6 +300,7 @@ sb.add_request_handler(SetConfigIntentHandler())
 sb.add_request_handler(ScreenActionIntentHandler())
 sb.add_request_handler(RoomIntentHandler())
 sb.add_request_handler(ChannelIntentHandler())
+sb.add_request_handler(BlindsIntentHandler())
 sb.add_request_handler(JustSayIntentHandler())
 sb.add_request_handler(YesNoIntentHandler())
 sb.add_request_handler(AirIntentHandler())

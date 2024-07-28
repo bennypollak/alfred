@@ -21,6 +21,9 @@ device_names_map = {
     "tv": { "small": "stv", "big": "btv" },
     "tivo": { "small": "st", "big": "bt" }
 }
+def ifttt_url(command):
+    return f"https://maker.ifttt.com/trigger/{command.replace(' ','%20')}/json/with/key/4ZBybdFfJlCXRCC3gXzZ-"
+
 commands_map = {
         "last": { "device": "tivo"  },
         "guide": { "device": "tivo"  },
@@ -63,12 +66,24 @@ commands_map = {
             "device": "tv", "command": "volume-down", "count": 5
         },
         "sleep more": { "device": "url", "command": {
-            "small": "https://maker.ifttt.com/trigger/small%20sleep%20more/json/with/key/4ZBybdFfJlCXRCC3gXzZ-",
-            "big": "https://maker.ifttt.com/trigger/small%20sleep%20start/json/with/key/4ZBybdFfJlCXRCC3gXzZ-",
+            "small": ifttt_url("small sleep more"),
+            "big": ifttt_url("small sleep more")
         }},
         "sleep": { "device": "url", "command": {
-            "small": "https://maker.ifttt.com/trigger/small%20sleep%20start/json/with/key/4ZBybdFfJlCXRCC3gXzZ-",
-            "big": "https://maker.ifttt.com/trigger/small%20sleep%20start/json/with/key/4ZBybdFfJlCXRCC3gXzZ-",
+            "small": ifttt_url("small sleep start"),
+            "big": ifttt_url("small sleep more")
+        }},
+        "open": { "device": "url", "command": {
+            "small": ifttt_url("small blinds open"),
+            "big": ifttt_url("big blinds open")
+        }},
+        "closed": { "device": "url", "command": {
+            "small": ifttt_url("small blinds closed"),
+            "big": ifttt_url("big blinds closed")
+        }},
+        "middle": { "device": "url", "command": {
+            "small": ifttt_url("small blinds morning"),
+            "big": ifttt_url("big blinds morning")
         }},
         "fire tv": {
             "device": "tv",
