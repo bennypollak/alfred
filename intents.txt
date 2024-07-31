@@ -1,3 +1,24 @@
+{blinds_type} the blinds
+set blinds to {blinds_type}
+set  blinds {blinds_type}
+blinds {blinds_type}
+
+{blinds_type} {room} the blinds
+set {room} blinds to {blinds_type}
+set the {room} blinds to {blinds_type}
+set {room}  blinds {blinds_type}
+blinds {blinds_type}
+
+{blinds_type} the blinds in {room}
+set blinds to {blinds_type} in {room}
+set  blinds {blinds_type} in {room}
+blinds {blinds_type} in {room}
+
+
+
+
+
+
 {room} heater {on_off}
 turn {on_off} the heater
 turn {on_off} the heater in {room}

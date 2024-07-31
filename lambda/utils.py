@@ -103,10 +103,6 @@ def process_request(session_attributes):
             path = f"wemo/thermo/{room_number}" if on_off == 'on' else f"wemo/cycle/{room_number}/0"
     else:
         times = int(session_attributes.get('intended_times', 1))
-        action = session_attributes.get('intended_action')
-        if not action:
-            return f"No action defined for {intent_name}"
-        commands = commands_map.get(action)
         if intent_name == 'ChannelIntent':
             channel = session_attributes.get('channel_number')
             station = session_attributes.get('intended_station')
@@ -121,6 +117,10 @@ def process_request(session_attributes):
             for channel in list(str(channel)):
                 commands.append( { "device": "tivo", "command": channel, "count": 1 } )
         else:
+            action = session_attributes.get('intended_action')
+            if not action:
+                return f"No action defined for {intent_name}"
+            commands = commands_map.get(action)
             if not isinstance(commands, list) and commands['device'] == 'url':
                 url = commands.get('command').get(room)
             else:

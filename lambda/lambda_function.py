@@ -31,6 +31,7 @@ class LaunchRequestHandler(AbstractRequestHandler):
         debug = config.get('debug', True)
         session_attributes['debug'] = debug
         session_attributes['follow up'] = config.get('follow up', False)
+        session_attributes['verbose'] = config.get('verbose', False)
         user_name = 'Benny'
         session_attributes['user_name'] = user_name
         session_attributes['intent_name'] = "LaunchRequest"
@@ -54,8 +55,9 @@ class SetConfigIntentHandler(AbstractRequestHandler):
         return is_intent_name("SetConfigIntent")(handler_input)
     def handle(self, handler_input):
         session_attributes = handler_input.attributes_manager.session_attributes
-        debug = session_attributes.get('debug', 'on')
-        follow_up = session_attributes.get('follow up', False)
+        debug = session_attributes.get('debug', True)
+        verbose = session_attributes.get('verbose', True)
+        follow_up = session_attributes.get('follow up', True)
         original_on_off, intended_on_off = utils.slot_value(handler_input, 'on_off', 'on')
         original_config_item, intended_config_item = utils.slot_value(handler_input, 'config_item')
         config = s3.get_config()
@@ -66,20 +68,6 @@ class SetConfigIntentHandler(AbstractRequestHandler):
         return (handler_input.response_builder.speak(speak_output)
             .set_card(SimpleCard(f"Alfred", speak_text))
             .set_should_end_session(True).response)
-
-class ScreenPowerIntentHandler(AbstractRequestHandler):
-    def can_handle(self, handler_input):
-        return ask_utils.is_intent_name("ScreenPowerIntent")(handler_input)
-    def handle(self, handler_input):
-        session_attributes = handler_input.attributes_manager.session_attributes
-        debug = session_attributes.get('debug', False)
-        session_attributes['intent_name'] = intent_name = get_intent_name(handler_input)
-        session_attributes['action'] = session_attributes['intended_action'] = 'tv-power'
-        power, intended_power = utils.slot_value(handler_input, 'power', 'tv-power')
-        print(f"Intent {intent_name} Power: {power}, Intended Power: {intended_power}")
-        session_attributes['power'] = power
-        session_attributes['intended_power'] = intended_power
-        return handle_room(handler_input, session_attributes, 'power')
 
 class RoomIntentHandler(AbstractRequestHandler):
     def can_handle(self, handler_input):
@@ -99,9 +87,8 @@ class ChannelIntentHandler(AbstractRequestHandler):
         return ask_utils.is_intent_name("ChannelIntent")(handler_input)
     def handle(self, handler_input):
         session_attributes = handler_input.attributes_manager.session_attributes
-        debug = session_attributes.get('debug', True)
         session_attributes['intent_name'] = intent_name = get_intent_name(handler_input)
-        session_attributes['action'] = 'channel'
+        session_attributes['intended_action'] = session_attributes['action'] = 'channel'
         channel_number, intended_channel_number = utils.slot_value(handler_input, 'channel_number')
         station, intended_station = utils.slot_value(handler_input, 'station')
         print(f"ChannelIntentHandler Intent Name: {intent_name} Station: {intended_station} Intended Channel Number: {intended_channel_number}")
@@ -110,61 +97,69 @@ class ChannelIntentHandler(AbstractRequestHandler):
             return handler_input.response_builder.speak(speak_output).ask(speak_output).response
         session_attributes['channel_number'] = channel_number
         session_attributes['intended_station'] = intended_station
-        return handle_room(handler_input, session_attributes, 'channel')
+        return handle_room(handler_input, session_attributes)
 
-class BlindsIntentHandler(AbstractRequestHandler):
+class ActionIntentHandler(AbstractRequestHandler):
     def can_handle(self, handler_input):
-        return ask_utils.is_intent_name("BlindsIntent")(handler_input)
+        try:
+            intent_name = get_intent_name(handler_input)
+            return intent_name in ['AirIntent', 'BlindsIntent', 'ScreenActionIntent', 'DeviceIntent', 'ScreenPowerIntent']
+        except:
+            return False
     def handle(self, handler_input):
         session_attributes = handler_input.attributes_manager.session_attributes
-        session_attributes['intent_name'] = intent_name = get_intent_name(handler_input)
-        blinds_type, intended_blinds_type = utils.slot_value(handler_input, 'blinds_type')
-        print(f"Intent Name: {intent_name} Blinds: {intended_blinds_type}")
-        session_attributes['action'] = blinds_type
-        session_attributes['intended_action'] = intended_blinds_type
-        return handle_room(handler_input, session_attributes, 'blinds')
+        intent_name = session_attributes['intent_name'] = get_intent_name(handler_input)
+        intended_action = intent_name.replace('Intent', '').lower()
+        needs_room = True
+        if intent_name == 'BlindsIntent':
+            type, intended_type = utils.slot_value(handler_input, 'blinds_type')
 
-class AirIntentHandler(AbstractRequestHandler):
-    def can_handle(self, handler_input):
-        return ask_utils.is_intent_name("AirIntent")(handler_input)
-    def handle(self, handler_input):
-        session_attributes = handler_input.attributes_manager.session_attributes
-        debug = session_attributes.get('debug', True)
-        session_attributes['intent_name'] = get_intent_name(handler_input)
-        original_on_off, intended_on_off = utils.slot_value(handler_input, 'on_off', 'on')
-        session_attributes['on_off'] = intended_on_off
-        original_temp, intended_temp = utils.slot_value(handler_input, 'temp')
-        session_attributes['temp'] = intended_temp
-        return handle_room(handler_input, session_attributes, 'air')
-
-class ScreenActionIntentHandler(AbstractRequestHandler):
-    def can_handle(self, handler_input):
-        return ask_utils.is_intent_name("ScreenActionIntent")(handler_input)
-    def handle(self, handler_input):
-        session_attributes = handler_input.attributes_manager.session_attributes
-        session_attributes['intent_name'] = get_intent_name(handler_input)
-        debug = session_attributes.get('debug', False)
-        action, intended_action = utils.slot_value(handler_input, 'action')
-        session_attributes['action'] = action
+            session_attributes['action'] = type
+            session_attributes['intended_action'] = intended_type
+            intended_action = intended_type
+        elif intent_name == 'AirIntent':
+            intended_action = 'air'
+            original_on_off, intended_on_off = utils.slot_value(handler_input, 'on_off', 'on')
+            session_attributes['on_off'] = intended_on_off
+            original_temp, intended_temp = utils.slot_value(handler_input, 'temp')
+            session_attributes['temp'] = intended_temp
+        elif intent_name == 'ScreenActionIntent':
+            action, intended_action = utils.slot_value(handler_input, 'action')
+            session_attributes['action'] = session_attributes['intended_action'] = action, intended_action
+            times, intended_times = utils.slot_value(handler_input, 'times', 1)
+            session_attributes['intended_times'] = intended_times
+        elif intent_name == 'DeviceIntent':
+            needs_room = False
+            on_off, intended_on_off = utils.slot_value(handler_input, 'on_off')
+            session_attributes['intended_on_off'] = intended_on_off
+            session_attributes['on_off'] = on_off
+            device, intended_device = utils.slot_value(handler_input, 'device')
+            session_attributes['intended_device'] = intended_device
+            session_attributes['device'] = device
+            intended_action = intended_on_off
+        elif intent_name == 'ScreenPowerIntent':
+            intended_action = session_attributes['action'] = session_attributes['intended_action'] = 'tv-power'
+            power, intended_power = utils.slot_value(handler_input, 'power', 'tv-power')
+            session_attributes['power'] = power
+            session_attributes['intended_power'] = intended_power
+        print(f"ActionIntentHandler:{intent_name} Intended Action: {intended_action}")
         session_attributes['intended_action'] = intended_action
-        times, intended_times = utils.slot_value(handler_input, 'times', 1)
-        session_attributes['intended_times'] = intended_times
-        return handle_room(handler_input, session_attributes, intended_action)
+        return handle_room(handler_input, session_attributes, needs_room=needs_room)
 
-class DeviceIntentHandler(AbstractRequestHandler):
-    def can_handle(self, handler_input):
-        return ask_utils.is_intent_name("DeviceIntent")(handler_input)
-    def handle(self, handler_input):
-        session_attributes = handler_input.attributes_manager.session_attributes
-        session_attributes['intent_name'] = get_intent_name(handler_input)
-        debug = session_attributes.get('debug', False)
-        on_off, intended_on_off = utils.slot_value(handler_input, 'on_off')
-        session_attributes['intended_on_off'] = intended_on_off
-        session_attributes['on_off'] = on_off
-        device, intended_device = utils.slot_value(handler_input, 'device')
-        session_attributes['intended_device'] = intended_device
-        session_attributes['device'] = device
-        return handle_request(handler_input, session_attributes)
+# class ScreenPowerIntentHandler(AbstractRequestHandler):
+#     def can_handle(self, handler_input):
+#         return ask_utils.is_intent_name("ScreenPowerIntent")(handler_input)
+#     def handle(self, handler_input):
+#         session_attributes = handler_input.attributes_manager.session_attributes
+#         debug = session_attributes.get('debug', False)
+#         session_attributes['intent_name'] = intent_name = get_intent_name(handler_input)
+#         session_attributes['action'] = session_attributes['intended_action'] = 'tv-power'
+#         power, intended_power = utils.slot_value(handler_input, 'power', 'tv-power')
+#         print(f"Intent {intent_name} Power: {power}, Intended Power: {intended_power}")
+#         session_attributes['power'] = power
+#         session_attributes['intended_power'] = intended_power
+#         return handle_room(handler_input, session_attributes, 'power')
+#
 
 class JustSayIntentHandler(AbstractRequestHandler):
     def can_handle(self, handler_input):
@@ -203,11 +198,11 @@ class YesNoIntentHandler(AbstractRequestHandler):
     def handle(self, handler_input):
         session_attributes = handler_input.attributes_manager.session_attributes
         debug = session_attributes.get('debug', False)
-        next_intent = session_attributes.get('next_intent')
         user_name = session_attributes.get('user_name', False)
         yes_no, intended_yes_no = utils.slot_value(handler_input, 'yes_no')
         next_intent = session_attributes.get('next_intent')
         current_output_text = session_attributes.get('current_output_text', '')
+        print(f"yes no: {intended_yes_no}, next: {next_intent}, current_output_text: {current_output_text}")
         if not intended_yes_no and not next_intent:
             speak_text = f"{current_output_text} Anything else {user_name}?" if debug else f"{current_output_text} More?"
             speak_output = alfred_voice(speak_text)
@@ -215,7 +210,6 @@ class YesNoIntentHandler(AbstractRequestHandler):
             return (handler_input.response_builder.speak(speak_output)
                     .set_card(SimpleCard(f"Alfred", f"{speak_text}"))
                     .ask(reprompt_output).response)
-        print(f"YesNoIntentHandler {next_intent}: {yes_no}, {intended_yes_no}")
         if intended_yes_no == 'yes' or next_intent:
             if next_intent:
                 session_attributes['current_output_text'] = None
@@ -240,14 +234,15 @@ class YesNoIntentHandler(AbstractRequestHandler):
                     .set_card(SimpleCard(f"Alfred", speak_text))
                     .set_should_end_session(True).response)
 
-def handle_room(handler_input, session_attributes, intended_action):
+def handle_room(handler_input, session_attributes, needs_room=True):
     debug = session_attributes.get('debug')
     room_name, intended_room_name = utils.slot_value(handler_input, 'room')
     if not room_name:
-        room_name = intended_room_name = utils.room_echo_device_in(handler_input)
-    if not room_name:
         room_name = intended_room_name = session_attributes.get('intended_room_name')
     if not room_name:
+        room_name = intended_room_name = utils.room_echo_device_in(handler_input)
+    if needs_room and not room_name:
+        intended_action = session_attributes['intended_action']
         device_name = utils.echo_device_name(handler_input)
         speak_text = f"{intended_action} for which room from {device_name}?" if debug else f"{intended_action} for "
         speak_output = alfred_voice(speak_text)
@@ -257,6 +252,7 @@ def handle_room(handler_input, session_attributes, intended_action):
                 .add_directive(DelegateDirective(updated_intent=Intent(name="RoomIntent")))
                 .response
                 )
+    print(f"RoomIntentHandler Room Name: {room_name} Intended Room Name: {intended_room_name}")
     session_attributes['original_room_name'] = room_name
     session_attributes['intended_room_name'] = intended_room_name
     return handle_request(handler_input, session_attributes)
@@ -265,20 +261,25 @@ def handle_request(handler_input, session_attributes):
     session_attributes = handler_input.attributes_manager.session_attributes
     room_name = session_attributes.get('original_room_name')
     debug = session_attributes.get('debug', True)
+    debug = session_attributes.get('debug', True)
     intent_name = session_attributes.get('intent_name')
     intent_name_text = utils.camel_to_space(intent_name, trim_last=True)
-    follow_up = session_attributes.get('follow up', False)
+    follow_up = session_attributes.get('follow up', True)
     print(f"handling Intent Name: {intent_name}, Room Name: {room_name}")
-    send_result = utils.process_request(session_attributes)
-    print(f"Send result: {send_result}")
-    url = send_result.get('url')
-    response = send_result.get('response', 'unknown response')
-    output_text = f"Did {intent_name_text} for {room_name} and got {response}" if debug else f" {'ok' if response.lower() == 'success' else response}."
+    sent_result = utils.process_request(session_attributes)
+    print(f"Sent result: {sent_result}")
+    url = sent_result.get('url')
+    print(f"Sent url: {url}")
+    response = sent_result.get('response', 'unknown response')
+    print(f"response: {response}, follow up: {follow_up}")
+    output_text = f"Did {intent_name_text} for {room_name} and got {response}" if debug else f" {'' if response.lower() == 'success' else response}."
     if follow_up:
+        print(f"Following up: {output_text}")
         session_attributes['next_intent'] = None
         session_attributes['current_output_text'] = output_text
         output_text += f" More?"
         speak_output = alfred_voice(output_text)
+        print(f"Following up 2: {output_text}")
         return (handler_input.response_builder.speak(speak_output)
                 # .speak(speak_output)
                 .set_card(SimpleCard(f"Alfred", f"{output_text} for {url}"))
@@ -286,7 +287,7 @@ def handle_request(handler_input, session_attributes):
                 .response
                 )
 
-    print(send_result)
+    print(sent_result)
     speak_output = alfred_voice(output_text)
     return (handler_input.response_builder.speak(speak_output if debug else alfred_voice('Ok'))
             .set_card(SimpleCard(f"Alfred", f"{output_text} for {url}"))
@@ -294,16 +295,14 @@ def handle_request(handler_input, session_attributes):
 
 sb = SkillBuilder()
 sb.add_request_handler(LaunchRequestHandler())
-sb.add_request_handler(ScreenPowerIntentHandler())
-sb.add_request_handler(DeviceIntentHandler())
+# sb.add_request_handler(ScreenPowerIntentHandler())
 sb.add_request_handler(SetConfigIntentHandler())
-sb.add_request_handler(ScreenActionIntentHandler())
 sb.add_request_handler(RoomIntentHandler())
 sb.add_request_handler(ChannelIntentHandler())
-sb.add_request_handler(BlindsIntentHandler())
+# sb.add_request_handler(DeviceIntentHandler())
 sb.add_request_handler(JustSayIntentHandler())
 sb.add_request_handler(YesNoIntentHandler())
-sb.add_request_handler(AirIntentHandler())
+sb.add_request_handler(ActionIntentHandler())
 
 lambda_deprecated.add_request_handlers(sb, logger)
 # Must go at the end!
