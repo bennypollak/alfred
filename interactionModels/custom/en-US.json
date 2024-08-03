@@ -32,7 +32,11 @@
                         "tv in {room}",
                         "tv {power} in {room}",
                         "turn the tv {power}",
-                        "turn the tv {power} in {room}"
+                        "turn {power} the tv",
+                        "turn {power} the tv in {room}",
+                        "turn the tv {power} in {room}",
+                        "turn the tv {power} in the {room}",
+                        "power"
                     ]
                 },
                 {
@@ -144,15 +148,22 @@
                         {
                             "name": "room",
                             "type": "RoomType"
+                        },
+                        {
+                            "name": "times",
+                            "type": "AMAZON.NUMBER"
                         }
                     ],
                     "samples": [
-                        "{room} {action}",
+                        "{room} {action} {times} times",
+                        "{room} {action} {times}",
                         "{room} tv {action}",
                         "{action} {room}",
                         "{action} {room} tv",
                         "{action} tv {room}",
                         "{action} in {room}",
+                        "{action} {times}",
+                        "{action} {times} times",
                         "{action}",
                         "set tv to {action}",
                         "set tv to {action} in {room}"
@@ -171,6 +182,7 @@
                         }
                     ],
                     "samples": [
+                        "{config_item} {on_off}",
                         "set {config_item} {on_off}"
                     ]
                 },
@@ -189,14 +201,14 @@
                     "slots": [
                         {
                             "name": "yes_no",
-                            "type": "YesNoType",
-                            "samples": [
-                                "{yes_no} please",
-                                "{yes_no}"
-                            ]
+                            "type": "YesNoType"
                         }
                     ],
-                    "samples": []
+                    "samples": [
+                        "please {yes_no}",
+                        "{yes_no} please",
+                        "{yes_no}"
+                    ]
                 },
                 {
                     "name": "JustSayMorningRoutineIntent",
@@ -278,6 +290,55 @@
                         "{temp}",
                         "{room} more {temp}",
                         "{room} {temp}"
+                    ]
+                },
+                {
+                    "name": "DeviceIntent",
+                    "slots": [
+                        {
+                            "name": "device",
+                            "type": "DeviceType"
+                        },
+                        {
+                            "name": "on_off",
+                            "type": "OnOff"
+                        }
+                    ],
+                    "samples": [
+                        "turn {on_off} the {device}",
+                        "turn the {device} {on_off}",
+                        "turn {on_off} {device}",
+                        "{device} to  {on_off}",
+                        "turn {device} {on_off}",
+                        "{device} {on_off}"
+                    ]
+                },
+                {
+                    "name": "BlindsIntent",
+                    "slots": [
+                        {
+                            "name": "blinds_type",
+                            "type": "BlindsType"
+                        },
+                        {
+                            "name": "room",
+                            "type": "RoomType"
+                        }
+                    ],
+                    "samples": [
+                        "{blinds_type} the blinds",
+                        "set blinds to {blinds_type}",
+                        "set  blinds {blinds_type}",
+                        "blinds to. {blinds_type}",
+                        "{blinds_type} {room} the blinds",
+                        "set {room} blinds to {blinds_type}",
+                        "set the {room} blinds to {blinds_type}",
+                        "set {room}  blinds {blinds_type}",
+                        "{room} blinds {blinds_type}",
+                        "{blinds_type} the blinds in {room}",
+                        "set blinds to {blinds_type} in {room}",
+                        "set  blinds {blinds_type} in {room}",
+                        "blinds {blinds_type} in {room}"
                     ]
                 }
             ],
@@ -411,6 +472,139 @@
                     "values": [
                         {
                             "name": {
+                                "value": "skip backward",
+                                "synonyms": [
+                                    "skip backwarda",
+                                    "skip back"
+                                ]
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "skip forward",
+                                "synonyms": [
+                                    "skip"
+                                ]
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "channel down",
+                                "synonyms": [
+                                    "app"
+                                ]
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "channel up"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "sleep more"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "sleep"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "tivo"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "resume"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "page down"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "page up"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "right"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "left"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "down"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "up"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "aspect",
+                                "synonyms": [
+                                    "zoom"
+                                ]
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "record"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "guide"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "last"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "select"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "live"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "play"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "forward"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "skip commercials"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "speed"
+                            }
+                        },
+                        {
+                            "name": {
                                 "value": "softer",
                                 "synonyms": [
                                     "quieter",
@@ -438,7 +632,8 @@
                             "name": {
                                 "value": "cable",
                                 "synonyms": [
-                                    "tivo"
+                                    "cable tv",
+                                    "dvr"
                                 ]
                             }
                         },
@@ -484,6 +679,7 @@
                             "name": {
                                 "value": "no",
                                 "synonyms": [
+                                    "don't",
                                     "nope"
                                 ]
                             }
@@ -492,6 +688,7 @@
                             "name": {
                                 "value": "yes",
                                 "synonyms": [
+                                    "do",
                                     "yep"
                                 ]
                             }
@@ -501,6 +698,11 @@
                 {
                     "name": "ConfigType",
                     "values": [
+                        {
+                            "name": {
+                                "value": "verbose"
+                            }
+                        },
                         {
                             "name": {
                                 "value": "follow up",
@@ -547,6 +749,100 @@
                                     "more warm",
                                     "more hot",
                                     "warmer"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "DeviceType",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "kitchen"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "three"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "bookshelf"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "one"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "blinds"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "two"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "hallway"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "bathroom"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "dining room"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "living room",
+                                "synonyms": [
+                                    "living room light"
+                                ]
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "lamp"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "BlindsType",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "middle",
+                                "synonyms": [
+                                    "morning"
+                                ]
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "open",
+                                "synonyms": [
+                                    "today",
+                                    "day"
+                                ]
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "closed",
+                                "synonyms": [
+                                    "close",
+                                    "dark"
                                 ]
                             }
                         }
@@ -669,6 +965,13 @@
                             "confirmationRequired": false,
                             "elicitationRequired": false,
                             "prompts": {}
+                        },
+                        {
+                            "name": "times",
+                            "type": "AMAZON.NUMBER",
+                            "confirmationRequired": false,
+                            "elicitationRequired": false,
+                            "prompts": {}
                         }
                     ]
                 },
@@ -702,10 +1005,31 @@
                             "name": "yes_no",
                             "type": "YesNoType",
                             "confirmationRequired": false,
+                            "elicitationRequired": false,
+                            "prompts": {}
+                        }
+                    ]
+                },
+                {
+                    "name": "DeviceIntent",
+                    "confirmationRequired": false,
+                    "prompts": {},
+                    "slots": [
+                        {
+                            "name": "device",
+                            "type": "DeviceType",
+                            "confirmationRequired": false,
                             "elicitationRequired": true,
                             "prompts": {
-                                "elicitation": "Elicit.Slot.488552655953.702310564531"
+                                "elicitation": "Elicit.Slot.1547677999266.1572724318703"
                             }
+                        },
+                        {
+                            "name": "on_off",
+                            "type": "OnOff",
+                            "confirmationRequired": false,
+                            "elicitationRequired": false,
+                            "prompts": {}
                         }
                     ]
                 }
@@ -818,6 +1142,15 @@
                     {
                         "type": "SSML",
                         "value": "<speak><voice name='Matthew'> would you like more?</voice></speak>"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.1547677999266.1572724318703",
+                "variations": [
+                    {
+                        "type": "SSML",
+                        "value": "<speak><voice name='Matthew'>Which device </voice></speak>"
                     }
                 ]
             }
