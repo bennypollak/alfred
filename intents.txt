@@ -1,69 +1,149 @@
-{blinds_type} the blinds
-set blinds to {blinds_type}
-set  blinds {blinds_type}
-blinds {blinds_type}
-
-{blinds_type} {room} the blinds
-set {room} blinds to {blinds_type}
-set the {room} blinds to {blinds_type}
-set {room}  blinds {blinds_type}
-blinds {blinds_type}
-
-{blinds_type} the blinds in {room}
-set blinds to {blinds_type} in {room}
-set  blinds {blinds_type} in {room}
-blinds {blinds_type} in {room}
-
-
-
-
-
-
-{room} heater {on_off}
-turn {on_off} the heater
-turn {on_off} the heater in {room}
-turn heater {on_off} in {room}
-turn heater {on_off}
-turn the heater {on_off} in {room}
-turn the heater {on_off}
-turn {room} heater {on_off}
-heater {on_off} in {room}
-heater {on_off} the {room}
-heater {on_off}
-{room} ac {on_off}
-turn {on_off} the ac
-turn {on_off} the ac in {room}
-turn {on_off} the {room} ac
-turn {on_off} {room} ac
-turn {on_off} {room} air conditioner
-turn {on_off} {room} heater
-turn ac {on_off} in {room}
-turn ac {on_off}
-turn the ac {on_off} in {room}
-turn the ac {on_off}
-turn {room} ac {on_off}
-ac in {room}
-a.c. in the {room}
-ac in the {room}
-ac {on_off} in {room}
-ac {on_off} the {room}
-ac {on_off}
-{room} air conditioner {on_off}
-turn {on_off} the air conditioner
-turn {on_off} the air conditioner in {room}
-turn air conditioner {on_off} in {room}
-turn air conditioner {on_off}
-turn the air conditioner {on_off} in {room}
-turn the air conditioner {on_off}
-turn {room} air conditioner {on_off}
-air conditioner {on_off} in {room}
-air conditioner {on_off} the {room}
-air conditioner {on_off}
-set {room} {temp}
-set {temp} in {room}
-turn {room} {temp}
-turn {temp} in {room}
-{temp} in {room}
-{temp}
-{room} more {temp}
-{room} {temp}
+NextStepIntent
+ScreenPowerIntent
+   {room} tv {power}
+   tv power
+   power the tv
+   tv {power}
+   tv {room}
+   tv in {room}
+   tv {power} in {room}
+   turn the tv {power}
+   turn {power} the tv
+   turn {power} the tv in {room}
+   turn the tv {power} in {room}
+   turn the tv {power} in the {room}
+   power
+ChannelIntent
+   {room} channel {channel_number}
+   {room} to {channel_number}
+   {room} {channel_number}
+   {room} {station}
+   set {room} to {channel_number}
+   {channel_number} in {room}
+   tune in to {channel_number}
+   set channel {room} to {channel_number}
+   channel {channel_number}
+   channel {channel_number} in {room}
+   channel {channel_number} on {room}
+   watch channel {channel_number}
+   watch channel {channel_number} in {room}
+   watch channel {channel_number} on {room}
+   {room} to {station}
+   set {room} to {station}
+   tune in to {station}
+   set channel {room} to {station}
+   {station}
+   {station} in {room}
+   {station} on {room}
+   watch {station}
+   watch {station} in {room}
+   watch {station} on {room}
+AMAZON.CancelIntent
+AMAZON.HelpIntent
+AMAZON.StopIntent
+AMAZON.NavigateHomeIntent
+AMAZON.FallbackIntent
+TestIntent
+   test
+   test {room}
+RoomIntent
+ScreenActionIntent
+   {room} {action} {times} times
+   {room} {action} {times}
+   {room} tv {action}
+   {action} {room}
+   {action} {room} tv
+   {action} tv {room}
+   {action} in {room}
+   {action} {times}
+   {action} {times} times
+   {action}
+   set tv to {action}
+   set tv to {action} in {room}
+SetConfigIntent
+   {config_item} {on_off}
+   set {config_item} {on_off}
+JustSayWhyAlfredIntent
+   Who the hell is Alfred
+   Why the hell Alfred
+   Who is Alfred
+   Why Alfred
+YesNoIntent
+   please {yes_no}
+   {yes_no} please
+   {yes_no}
+JustSayMorningRoutineIntent
+   Good morning Google
+JustSayTestIntent
+   Testing
+   Just testing
+AirIntent
+   {room} heater {on_off}
+   turn {on_off} the heater
+   turn {on_off} the heater in {room}
+   turn heater {on_off} in {room}
+   turn heater {on_off}
+   turn the heater {on_off} in {room}
+   turn the heater {on_off}
+   turn {room} heater {on_off}
+   heater {on_off} in {room}
+   heater {on_off} the {room}
+   heater {on_off}
+   {room} ac {on_off}
+   turn {on_off} the ac
+   turn {on_off} the ac in {room}
+   turn {on_off} the {room} ac
+   turn {on_off} {room} ac
+   turn {on_off} {room} air conditioner
+   turn {on_off} {room} heater
+   turn ac {on_off} in {room}
+   turn ac {on_off}
+   turn the ac {on_off} in {room}
+   turn the ac {on_off}
+   turn {room} ac {on_off}
+   ac in {room}
+   a.c. in the {room}
+   ac in the {room}
+   ac {on_off} in {room}
+   ac {on_off} the {room}
+   ac {on_off}
+   {room} air conditioner {on_off}
+   turn {on_off} the air conditioner
+   turn {on_off} the air conditioner in {room}
+   turn air conditioner {on_off} in {room}
+   turn air conditioner {on_off}
+   turn the air conditioner {on_off} in {room}
+   turn the air conditioner {on_off}
+   turn {room} air conditioner {on_off}
+   air conditioner {on_off} in {room}
+   air conditioner {on_off} the {room}
+   air conditioner {on_off}
+   set {room} {temp}
+   set {temp} in {room}
+   turn {room} {temp}
+   turn {temp} in {room}
+   {temp} in {room}
+   {temp}
+   {room} more {temp}
+   {room} {temp}
+DeviceIntent
+   turn {on_off} the {device}
+   turn the {device} {on_off}
+   turn {on_off} {device}
+   {device} to  {on_off}
+   turn {device} {on_off}
+   {device} {on_off}
+BlindsIntent
+   {blinds_type} the blinds
+   set blinds to {blinds_type}
+   set  blinds {blinds_type}
+   blinds to. {blinds_type}
+   {blinds_type} {room} the blinds
+   set {room} blinds to {blinds_type}
+   set the {room} blinds to {blinds_type}
+   set {room}  blinds {blinds_type}
+   {room} blinds {blinds_type}
+   {blinds_type} the blinds in {room}
+   set blinds to {blinds_type} in {room}
+   set  blinds {blinds_type} in {room}
+   blinds {blinds_type} in {room}

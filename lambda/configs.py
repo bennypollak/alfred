@@ -128,8 +128,7 @@ device_types = {
 
 say_request_responses = {
     "JustSayWhyAlfredIntent": {
-        "text": "In the movie \"The Demon Seed,\" the machine the protagonist speaks to at home is named Alfred. Alfred is the home computer system that becomes controlled by the artificial intelligence Proteus IV.",
-        "next_text": "Would you like to know more about Alfred?",
+        "text": "In the movie \"The Demon Seed,\" the machine the protagonist speaks to at home is named Alfred. Alfred is the home computer system that becomes controlled by the artificial intelligence Proteus IV. At the end of the movie, Alfred impregnates the female protagonist with a demon seed.",
         "next_intent": "JustSayWhyAlfredMoreIntent"
     },
     "JustSayWhyAlfredMoreIntent": {

@@ -42,18 +42,18 @@ def slot_value(handler_input, name, default=None):
     value = default
     resolved_value = default
     # name = name.lower()
-    print(f"Slot name: {name}")
+    # print(f"Slot name: {name}")
     if slots and name in slots:
         value = slots[name].value #.lower
         value = str(value).lower() if value else default
         resolved_value = value
-        print(f"Slot {name} found as {value}")
+        # print(f"Slot {name} found as {value}")
         if value and slots[name].resolutions and slots[name].resolutions.resolutions_per_authority:
             resolution = slots[name].resolutions.resolutions_per_authority[0]
             if resolution.status.code.name == 'ER_SUCCESS_MATCH':
                 resolved_value = resolution.values[0].value.name.lower()
                 resolved_value = resolved_value.replace('.', '')
-    print(f"Slot value: {value}, resolved value: {resolved_value}")
+    # print(f"Slot value: {value}, resolved value: {resolved_value}")
     return value, resolved_value
 
 def send_request(url, payload={}, headers={}):
@@ -109,10 +109,7 @@ def process_request(session_attributes):
             if station:
                 channel = station_to_channel_map.get(station)
             if channel is None:
-                return {
-                    "response": f"No station for {room}",
-                    "url": ''
-                }
+                return { "response": f"No station for {room}" }
             commands = []
             for channel in list(str(channel)):
                 commands.append( { "device": "tivo", "command": channel, "count": 1 } )

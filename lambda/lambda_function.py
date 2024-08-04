@@ -146,21 +146,6 @@ class ActionIntentHandler(AbstractRequestHandler):
         session_attributes['intended_action'] = intended_action
         return handle_room(handler_input, session_attributes, needs_room=needs_room)
 
-# class ScreenPowerIntentHandler(AbstractRequestHandler):
-#     def can_handle(self, handler_input):
-#         return ask_utils.is_intent_name("ScreenPowerIntent")(handler_input)
-#     def handle(self, handler_input):
-#         session_attributes = handler_input.attributes_manager.session_attributes
-#         debug = session_attributes.get('debug', False)
-#         session_attributes['intent_name'] = intent_name = get_intent_name(handler_input)
-#         session_attributes['action'] = session_attributes['intended_action'] = 'tv-power'
-#         power, intended_power = utils.slot_value(handler_input, 'power', 'tv-power')
-#         print(f"Intent {intent_name} Power: {power}, Intended Power: {intended_power}")
-#         session_attributes['power'] = power
-#         session_attributes['intended_power'] = intended_power
-#         return handle_room(handler_input, session_attributes, 'power')
-#
-
 class JustSayIntentHandler(AbstractRequestHandler):
     def can_handle(self, handler_input):
         try:
@@ -176,21 +161,24 @@ class JustSayIntentHandler(AbstractRequestHandler):
         intent_name = get_intent_name(handler_input)
         say_request_response = configs.say_request_responses.get(intent_name)
         speak_text = say_request_response.get('text', "I don't know")
+        print(f"JustSayIntentHandler0: {intent_name} Speak Text: {speak_text}")
         speak_output = alfred_voice(speak_text)
-        more_text = say_request_response.get('next_text')
-        next_intent = say_request_response.get('next_intent')
+        next_intent = None # say_request_response.get('next_intent')
+        # next_intent_text = say_request_response.get('next_intent_text')
+        session_attributes['current_output_text'] = speak_text
         if not next_intent:
             return (handler_input.response_builder.speak(speak_output)
                     .set_card(SimpleCard(f"Alfred", speak_text))
-                    .set_should_end_session(True).response)
-        speak_text += f" {more_text}"
+                    .add_directive(DelegateDirective(updated_intent=Intent(name="YesNoIntent")))
+                    .response)
+        print(f"JustSayIntentHandler1: {intent_name} Speak Text: {speak_text}")
         session_attributes['next_intent'] = next_intent
-
+        # session_attributes['next_intent_text'] = next_intent_text
+        session_attributes['current_output_text'] = speak_text
         return (handler_input.response_builder.speak(speak_output)
                 .set_card(SimpleCard(f"Alfred", speak_text))
                 .add_directive(DelegateDirective(updated_intent=Intent(name="YesNoIntent")))
-                .response
-                )
+                .response)
 
 class YesNoIntentHandler(AbstractRequestHandler):
     def can_handle(self, handler_input):
@@ -207,26 +195,38 @@ class YesNoIntentHandler(AbstractRequestHandler):
             speak_text = f"{current_output_text} Anything else {user_name}?" if debug else f"{current_output_text} More?"
             speak_output = alfred_voice(speak_text)
             reprompt_output = alfred_voice(f"{speak_text}")
+            print(f"YesNoIntentHandler1: {speak_text} Next Intent: {next_intent}")
             return (handler_input.response_builder.speak(speak_output)
                     .set_card(SimpleCard(f"Alfred", f"{speak_text}"))
                     .ask(reprompt_output).response)
         if intended_yes_no == 'yes' or next_intent:
+            print(f"YesNoIntentHandler2: {intended_yes_no} Next Intent: {next_intent}")
             if next_intent:
-                session_attributes['current_output_text'] = None
+                session_attributes['next_intent'] = None
 
-                next_intent_text = utils.camel_to_space(next_intent, trim_last=True)
-                next_intent_text = f"{current_output_text} Ok {next_intent_text}"
-                return (handler_input.response_builder.speak(alfred_voice(next_intent_text))
-                        .add_directive(DelegateDirective(updated_intent=Intent(name=next_intent)))
-                        .set_card(SimpleCard(f"Alfred", f"{next_intent_text}"))
-                        .response
-                        )
+                # next_intent_text = session_attributes['current_output_text'] = 'hello there'
+                # next_intent_text = utils.camel_to_space(next_intent, trim_last=True)
+                next_intent_text = f"{current_output_text}"
+                # session_attributes['current_output_text'] = next_intent_text
+                print(f"YesNoIntentHandler3: current: {current_output_text} next: {next_intent_text}")
+                # "Directive \"Dialog.Delegate\" can be used only when a dialog is active and hasn't been completed"
+                dialog_state = handler_input.request_envelope.request.dialog_state
+                print(f"Dialog State: {dialog_state}")
+                if dialog_state in ("STARTED", "IN_PROGRESS"):
+                    return (handler_input.response_builder.speak(alfred_voice(current_output_text))
+                            .add_directive(DelegateDirective(updated_intent=Intent(name='YesNoIntent')))
+                            .set_card(SimpleCard(f"Alfred", f"{current_output_text}"))
+                            .response)
+                else:
+                    return (handler_input.response_builder.speak(alfred_voice(current_output_text))
+                            .add_directive(DelegateDirective(updated_intent=Intent(name='YesNoIntent', confirmation_status='NONE')))
+                            .set_card(SimpleCard(f"Alfred", f"{current_output_text}"))
+                            .response)
             speak_output = alfred_voice("Yes?")
             reprompt_output = alfred_voice("Yes?")
             return (handler_input.response_builder.speak(speak_output)
                     .set_card(SimpleCard(f"Alfred", f"Yes?"))
-                    .ask(reprompt_output).response
-                    )
+                    .ask(reprompt_output).response)
         else:
             speak_text = "Ok."
             speak_output = alfred_voice(speak_text)
